@@ -31,6 +31,8 @@ jobs:
         run: |
           git clone https://github.com/reidst/hendrix-today-uploader.git
           cd hendrix-today-uploader/
+      - run: pwd
+      - run: ls -l
       - name: Compile a clean web build
         run: |
           flutter clean
