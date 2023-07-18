@@ -29,7 +29,9 @@ jobs:
         run: echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
       - name: Checkout
         run: git clone https://github.com/reidst/hendrix-today-uploader.git
-      - run: cd hendrix-today-uploader/
+      - run: pwd
+      - run: ls -l
+      - run: cd ./hendrix-today-uploader/
       - run: pwd
       - run: ls -l
       - run: flutter clean
