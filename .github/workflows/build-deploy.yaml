@@ -28,24 +28,15 @@ jobs:
       - name: Add Flutter to PATH
         run: echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
       - name: Checkout
-        run: |
-          git clone https://github.com/reidst/hendrix-today-uploader.git
-          cd hendrix-today-uploader/
+        run: git clone https://github.com/reidst/hendrix-today-uploader.git
+      - run: cd hendrix-today-uploader/
       - run: pwd
       - run: ls -l
-      - name: Compile a clean web build
-        run: |
-          flutter clean
-          flutter build web --base-href "/hendrix-today-uploader/"
-      - name: Detach local Git repo
-        run: rm -rf .git
-      - name: Create a new Git repo in build/web/
-        run: |
-          cd build/web/
-          git init
-      - name: Commit the build
-        run: |
-          git add .
-          git commit -m "automated deployment commit"
-      - name: Push build to the gh-pages branch
-        run: git push -f https://github.com/reidst/hendrix-today-uploader.git HEAD:gh-pages
+      - run: flutter clean
+      - run: flutter build web --base-href "/hendrix-today-uploader/"
+      - run: rm -rf .git
+      - run: cd build/web/
+      - run: git init
+      - run: git add .
+      - run: git commit -m "automated deployment commit"
+      - run: git push -f https://github.com/reidst/hendrix-today-uploader.git HEAD:gh-pages
