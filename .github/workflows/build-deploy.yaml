@@ -1,4 +1,4 @@
-name: Build and Deploy Flutter Web App
+name: Build Flutter app and push to gh-pages
 
 on:
   push:
@@ -33,11 +33,14 @@ jobs:
         run: |
           flutter clean
           flutter build web --base-href "/hendrix-today-uploader/"
-      - name: Navigate to the new build
-        run: cd build/web/
-      - name: Initialize a temporary Git repo
+      - name: Detach local Git repo
+        run: rm -rf .git
+      - name: Create a new Git repo in build/web/
         run: |
+          cd build/web/
           git init
+      - name: Commit the build
+        run: |
           git add .
           git commit -m "automated deployment commit"
       - name: Push build to the gh-pages branch
