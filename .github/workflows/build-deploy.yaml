@@ -28,6 +28,8 @@ jobs:
         run: git clone https://github.com/flutter/flutter.git --depth 1 -b $FLUTTER_VERSION flutter
       - name: Add Flutter to PATH
         run: echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
+      - name: Setup Git subtree
+        run: git subtree add -P build/web https://github.com/reidst/hendrix-today-uploader.git gh-pages
       - name: Flutter clean and build
         run: |
           flutter clean
