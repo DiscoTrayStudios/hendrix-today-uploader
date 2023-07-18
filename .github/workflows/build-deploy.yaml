@@ -13,11 +13,6 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # Pages deployment permissions: https://stackoverflow.com/a/74167257
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
     steps:
       - name: Git config
         run: |
