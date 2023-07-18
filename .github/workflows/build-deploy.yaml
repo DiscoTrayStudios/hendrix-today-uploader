@@ -14,7 +14,9 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Git config
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Git config
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions"
@@ -26,8 +28,6 @@ jobs:
         run: git clone https://github.com/flutter/flutter.git --depth 1 -b $FLUTTER_VERSION flutter
       - name: Add Flutter to PATH
         run: echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
-      - name: Checkout
-        uses: actions/checkout@v3
       - name: Flutter clean and build
         run: |
           flutter clean
