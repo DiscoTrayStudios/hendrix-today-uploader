@@ -11,11 +11,11 @@ env:
   FLUTTER_VERSION: "3.10.6"
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     # Pages deployment permissions: https://stackoverflow.com/a/74167257
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
     steps:
@@ -33,9 +33,12 @@ jobs:
         run: |
           flutter clean
           flutter build web --base-href "/hendrix-today-uploader/"
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: "build/web/"
+      - name: Navigate to the new build
+        run: cd build/web/
+      - name: Initialize a temporary Git repo
+        run: |
+          git init
+          git add .
+          git commit -m "automated deployment commit"
+      - name: Push build to the gh-pages branch
+        run: git push -f https://github.com/reidst/hendrix-today-uploader.git HEAD:gh-pages
