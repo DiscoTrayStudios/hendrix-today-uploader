@@ -30,10 +30,7 @@ migrate_working_dir/
 .packages
 .pub-cache/
 .pub/
-
-# Explicitly include the web build (for deployment to GitHub Pages)
-/build/*
-!/build/web
+/build/
 
 # Symbolication related
 app.*.symbols
