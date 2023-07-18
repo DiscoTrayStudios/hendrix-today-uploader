@@ -29,12 +29,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Flutter clean and build
-        working-directory: ./hendrix-today-uploader
         run: |
           flutter clean
           flutter build web --base-href "/hendrix-today-uploader/"
       - name: Push build files to gh-pages
-        working-directory: ./hendrix-today-uploader
         run: |
           git add .
           git commit -m "automated deployment commit"
