@@ -29,16 +29,15 @@ jobs:
         run: echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
       - name: Checkout
         run: git clone https://github.com/reidst/hendrix-today-uploader.git
-      - run: pwd
-      - run: ls -l
-      - run: cd ./hendrix-today-uploader/
-      - run: pwd
-      - run: ls -l
-      - run: flutter clean
-      - run: flutter build web --base-href "/hendrix-today-uploader/"
-      - run: rm -rf .git
-      - run: cd build/web/
-      - run: git init
-      - run: git add .
-      - run: git commit -m "automated deployment commit"
-      - run: git push -f https://github.com/reidst/hendrix-today-uploader.git HEAD:gh-pages
+      - name: Flutter clean and build
+        working-directory: ./hendrix-today-uploader
+        run: |
+          flutter clean
+          flutter build web --base-href "/hendrix-today-uploader/"
+      - name: Push build files to gh-pages
+        working-directory: ./hendrix-today-uploader/build/web
+        run: |
+          git init
+          git add .
+          git commit -m "automated deployment commit"
+          git push -f https://github.com/reidst/hendrix-today-uploader.git HEAD:gh-pages
