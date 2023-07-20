@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
 
-const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
 class ExcelTable extends StatelessWidget {
   const ExcelTable({super.key, required this.excel});
   final ExcelData excel;
@@ -27,11 +25,10 @@ class ExcelTable extends StatelessWidget {
             defaultColumnWidth: const IntrinsicColumnWidth(),
             children: [
               TableRow(
-                children: alphabet
-                    .split('')
-                    .take(excel.colCount)
-                    .map((c) => Center(child: _TableItem(cellValue: c)))
-                    .toList(),
+                children: List.generate(
+                    excel.colCount,
+                    (col) => Center(
+                        child: _TableItem(cellValue: (col + 1).toString()))),
               ),
               ...excel.data.map((row) => TableRow(
                   children: row
