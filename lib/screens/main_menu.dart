@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 
+import 'package:hendrix_today_uploader/objects/excel_data.dart';
 import 'package:hendrix_today_uploader/screens/upload_file.dart';
 import 'package:hendrix_today_uploader/screens/view_databse.dart';
 
@@ -34,8 +35,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   }
 
   void _goToExcelViewPage(Excel excel) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => ExcelViewScreen(excel: excel)));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => UploadFileScreen(excel: ExcelData(excel))));
   }
 
   void _goToDatabaseViewPage() {

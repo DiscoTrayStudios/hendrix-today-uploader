@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 
-import 'package:excel/excel.dart';
+import 'package:hendrix_today_uploader/objects/excel_data.dart';
+import 'package:hendrix_today_uploader/widgets/excel_table.dart';
 
-class ExcelViewScreen extends StatelessWidget {
-  const ExcelViewScreen({super.key, required this.excel});
-  final Excel excel;
+class UploadFileScreen extends StatelessWidget {
+  const UploadFileScreen({super.key, required this.excel});
+  final ExcelData excel;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Upload File"),
+        title: const Text('Upload File'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Text("The default sheet is named "
-            "${excel.sheets[excel.getDefaultSheet()]?.sheetName}"),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ExcelTable(excel: excel),
       ),
     );
   }
