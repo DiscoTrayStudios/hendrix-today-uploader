@@ -7,8 +7,11 @@ environment:
   sdk: '>=3.0.6 <4.0.0'
 
 dependencies:
+  excel: ^2.1.0
+  file_picker: ^5.3.2
   flutter:
     sdk: flutter
+  url_launcher: ^6.1.12
 
 dev_dependencies:
   flutter_test:
