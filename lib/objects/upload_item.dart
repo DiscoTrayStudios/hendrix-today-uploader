@@ -1,3 +1,7 @@
+import 'package:flutter/material.dart' show debugPrint;
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
 
 // The following constants should be defined in accordance with the Excel sheet
@@ -30,47 +34,72 @@ class UploadItem {
     this.location,
     this.applyDeadline,
   });
-  final String id;
+  final int id;
   final String title;
   final String description;
   final String type;
   final String contactName;
   final String contactEmail;
-  final String beginPosting;
-  final String endPosting;
-  final String? date;
+  final DateTime beginPosting;
+  final DateTime endPosting;
+  final DateTime? date;
   final String? time;
   final String? location;
-  final String? applyDeadline;
+  final DateTime? applyDeadline;
 
   static bool isValidExcelRow(ExcelRow row) {
     if (row.get(idColumn) == null) return false;
+    if (int.tryParse(row.get(idColumn)!) == null) return false;
     if (row.get(titleColumn) == null) return false;
     if (row.get(descriptionColumn) == null) return false;
     if (row.get(typeColumn) == null) return false;
     if (row.get(contactNameColumn) == null) return false;
     if (row.get(contactEmailColumn) == null) return false;
     if (row.get(beginPostingColumn) == null) return false;
+    if (DateTime.tryParse(row.get(beginPostingColumn)!) == null) return false;
     if (row.get(endPostingColumn) == null) return false;
+    if (DateTime.tryParse(row.get(endPostingColumn)!) == null) return false;
     return true;
   }
 
   static UploadItem? fromExcelRow(ExcelRow row) {
     return isValidExcelRow(row)
         ? UploadItem(
-            id: row.get(idColumn)!,
+            id: int.parse(row.get(idColumn)!),
             title: row.get(titleColumn)!,
             description: row.get(descriptionColumn)!,
             type: row.get(typeColumn)!,
             contactName: row.get(contactNameColumn)!,
             contactEmail: row.get(contactEmailColumn)!,
-            beginPosting: row.get(beginPostingColumn)!,
-            endPosting: row.get(endPostingColumn)!,
-            date: row.get(dateColumn),
+            beginPosting: DateTime.parse(row.get(beginPostingColumn)!),
+            endPosting: DateTime.parse(row.get(endPostingColumn)!),
+            date: DateTime.tryParse(row.get(dateColumn) ?? ''),
             time: row.get(timeColumn),
             location: row.get(locationColumn),
-            applyDeadline: row.get(applyDeadlineColumn),
+            applyDeadline:
+                DateTime.tryParse(row.get(applyDeadlineColumn) ?? ''),
           )
         : null;
+  }
+
+  void uploadToFirestore() {
+    final db = FirebaseFirestore.instance;
+    const collName = 'uploaderTest';
+    final data = <String, dynamic>{
+      'id': id,
+      'title': title,
+      'desc': description,
+      'eventType': type,
+      'contactName': contactName,
+      'contactEmail': contactEmail,
+      'beginPosting': beginPosting,
+      'endPosting': endPosting,
+      'date': date,
+      'time': time,
+      'location': location,
+      'applyDeadline': applyDeadline,
+    };
+    db.collection(collName).add(data).then(
+        (docRef) => debugPrint('DocumentSnapshot added with ID: ${docRef.id}'));
   }
 }

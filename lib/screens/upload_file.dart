@@ -28,10 +28,14 @@ class UploadFileScreen extends StatelessWidget {
               '${badItemIDs.join(', ')}.'),
           backgroundColor: Theme.of(context).colorScheme.error));
     } else {
+      for (final item in uploadItems) {
+        item.uploadToFirestore();
+      }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'Ready to upload ${uploadItems.length} items to the database! '
-              '(not yet implemented)')));
+        content:
+            Text('Successfully uploaded ${uploadItems.length} items to the '
+                'database!'),
+      ));
     }
   }
 
