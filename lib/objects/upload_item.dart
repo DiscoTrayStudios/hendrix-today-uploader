@@ -43,7 +43,7 @@ Future<UploadResult> uploadToFirestore(ExcelRow row) async {
     }
   } catch (e) {
     // e is just an `Object`, this is the only way to know it's a permission error
-    if (e.toString().contains('code=permission-denied')) {
+    if (e.toString().contains('permission-denied')) {
       return UploadResult.permissionDenied(row);
     }
     return UploadResult.unknownError(row);
