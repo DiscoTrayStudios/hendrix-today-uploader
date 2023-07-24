@@ -7,31 +7,69 @@ import 'package:hendrix_today_uploader/objects/excel_data.dart';
 import 'package:hendrix_today_uploader/objects/upload_item.dart';
 import 'package:hendrix_today_uploader/widgets/excel_table.dart';
 
-class UploadFileScreen extends StatelessWidget {
+class UploadFileScreen extends StatefulWidget {
   const UploadFileScreen({super.key, required this.excel});
   final ExcelData excel;
 
-  void _tryUpload(BuildContext context) async {
-    final List<UploadItem> uploadItems = [];
-    final List<String?> badItemIDs = [];
-    for (final row in excel.rows) {
-      final newItem = UploadItem.fromExcelRow(row);
-      if (newItem != null) {
-        uploadItems.add(newItem);
-      } else {
-        badItemIDs.add(row[idColumn]);
-      }
+  @override
+  State<UploadFileScreen> createState() => _UploadFileScreenState();
+}
+
+class _UploadFileScreenState extends State<UploadFileScreen> {
+  bool _uploadLoading = false;
+
+  void _tryUpload() async {
+    if (_uploadLoading) return; // already in progress
+    final List<UploadResult> results = [];
+    setState(() {
+      _uploadLoading = true;
+    });
+    for (final row in widget.excel.rows) {
+      final result = await uploadToFirestore(row);
+      results.add(result);
+      if (result.type == UploadResultType.permissionDenied) break;
     }
-    if (badItemIDs.isNotEmpty) {
+    setState(() {
+      _uploadLoading = false;
+    });
+    _displayResults(results);
+  }
+
+  void _displayResults(List<UploadResult> results) {
+    final invalidFields = results
+        .where((result) => result.type == UploadResultType.invalidFields);
+    if (invalidFields.isNotEmpty) {
+      String displayIDs = invalidFields
+          .map((result) => result.snapshot.get(idColumn))
+          .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('The following rows (by ID) are missing required data: '
-              '${badItemIDs.join(', ')}.'),
-          backgroundColor: Theme.of(context).colorScheme.error));
-    } else {
+        content: Text(
+            'The following rows (by ID) are improperly formatted or missing '
+            'required data: $displayIDs'),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ));
+    }
+    final unknownErrors =
+        results.where((result) => result.type == UploadResultType.unknownError);
+    if (unknownErrors.isNotEmpty) {
+      String displayIDs = unknownErrors
+          .map((result) => result.snapshot.get(idColumn))
+          .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'Ready to upload ${uploadItems.length} items to the database! '
-              '(not yet implemented)')));
+        content: Text(
+            'An unknown error occurred trying to upload the following rows (by '
+            'ID): $displayIDs'),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ));
+    }
+    if (results
+        .any((result) => result.type == UploadResultType.permissionDenied)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text(
+            'You do not have upload permission. Please sign in or contact the '
+            'maintainer of this upload tool.'),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ));
     }
   }
 
@@ -51,14 +89,15 @@ class UploadFileScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: ElevatedButton(
-                  onPressed: () => _tryUpload(context),
-                  child: const Text('Upload to App'),
+                  onPressed: _tryUpload,
+                  child:
+                      Text(_uploadLoading ? 'Uploading...' : 'Upload to App'),
                 ),
               ),
               const _LinkReminderText(),
             ],
           ),
-          ExcelTable(excel: excel),
+          ExcelTable(excel: widget.excel),
         ],
       ),
     );
