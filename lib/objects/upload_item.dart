@@ -14,14 +14,14 @@ class UploadResult {
   final UploadResultType type;
   final ExcelRow snapshot;
 
-  factory UploadResult.success(ExcelRow snapshot) =>
-      UploadResult(UploadResultType.success, snapshot);
-  factory UploadResult.permissionDenied(ExcelRow snapshot) =>
-      UploadResult(UploadResultType.permissionDenied, snapshot);
-  factory UploadResult.invalidFields(ExcelRow snapshot) =>
-      UploadResult(UploadResultType.invalidFields, snapshot);
-  factory UploadResult.unknownError(ExcelRow snapshot) =>
-      UploadResult(UploadResultType.unknownError, snapshot);
+  factory UploadResult.success(ExcelRow row) =>
+      UploadResult(UploadResultType.success, List.unmodifiable(row));
+  factory UploadResult.permissionDenied(ExcelRow row) =>
+      UploadResult(UploadResultType.permissionDenied, List.unmodifiable(row));
+  factory UploadResult.invalidFields(ExcelRow row) =>
+      UploadResult(UploadResultType.invalidFields, List.unmodifiable(row));
+  factory UploadResult.unknownError(ExcelRow row) =>
+      UploadResult(UploadResultType.unknownError, List.unmodifiable(row));
 }
 
 Future<UploadResult> uploadToFirestore(ExcelRow row) async {
