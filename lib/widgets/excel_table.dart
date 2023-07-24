@@ -7,20 +7,6 @@ class ExcelTable extends StatelessWidget {
   const ExcelTable({super.key, required this.excel});
   final ExcelData excel;
 
-  String _generateColumnLetter(int iCol) {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    // Algorithm source: https://learn.microsoft.com/en-us/office/troubleshoot/excel/convert-excel-column-numbers
-    String result = '';
-    iCol += 1;
-    while (iCol > 0) {
-      final a = (iCol - 1) ~/ 26;
-      final b = (iCol - 1) % 26;
-      result = alphabet[b] + result;
-      iCol = a;
-    }
-    return result;
-  }
-
   @override
   Widget build(BuildContext context) {
     return TableScroller(
@@ -30,13 +16,17 @@ class ExcelTable extends StatelessWidget {
         children: [
           TableRow(
             children: List.generate(
-              excel.colCount,
+              orderedColumnIndicies.length,
               (i) => Center(
-                  child: _TableItem(cellValue: _generateColumnLetter(i))),
+                child: _TableItem(
+                  cellValue: '${orderedColumnNames[i]} '
+                      '(${ExcelData.columnLetter(orderedColumnIndicies[i])})',
+                ),
+              ),
             ),
           ),
           ...excel.rows.map((row) => TableRow(
-              children: row
+              children: row.format
                   .map((cellValue) =>
                       _TableItem(cellValue: cellValue, maxLength: 40))
                   .toList())),

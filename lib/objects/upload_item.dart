@@ -1,20 +1,5 @@
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
 
-// The following constants should be defined in accordance with the Excel sheet
-// output by the submission form: column A = 0, B = 1, etc.
-const idColumn = 0;
-const titleColumn = 8;
-const descriptionColumn = 15;
-const typeColumn = 11;
-const contactNameColumn = 6;
-const contactEmailColumn = 7;
-const beginPostingColumn = 9;
-const endPostingColumn = 10;
-const dateColumn = 12;
-const timeColumn = 14;
-const locationColumn = 17;
-const applyDeadlineColumn = 13;
-
 class UploadItem {
   const UploadItem({
     required this.id,
