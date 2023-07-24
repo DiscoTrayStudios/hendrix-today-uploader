@@ -82,7 +82,7 @@ class UploadItem {
         : null;
   }
 
-  void uploadToFirestore() {
+  void uploadToFirestore() async {
     final db = FirebaseFirestore.instance;
     const collName = 'uploaderTest';
     final data = <String, dynamic>{
@@ -99,7 +99,19 @@ class UploadItem {
       'location': location,
       'applyDeadline': applyDeadline,
     };
-    db.collection(collName).add(data).then(
-        (docRef) => debugPrint('DocumentSnapshot added with ID: ${docRef.id}'));
+    final match =
+        (await db.collection(collName).where('id', isEqualTo: id).get())
+            .docs
+            .firstOrNull;
+    if (match == null) {
+      db
+          .collection(collName)
+          .add(data)
+          .then((docRef) => debugPrint('Document added with ID: ${docRef.id}'));
+    } else {
+      match.reference
+          .set(data)
+          .then((_) => debugPrint('Document updated with ID: ${match.id}'));
+    }
   }
 }
