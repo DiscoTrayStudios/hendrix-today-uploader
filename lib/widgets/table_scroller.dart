@@ -6,27 +6,37 @@ class TableScroller extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Two-axis scroll solution: https://stackoverflow.com/a/72734055
     final horizontalScrollController = ScrollController();
     final verticalScrollController = ScrollController();
-    return Expanded(
+    return Flexible(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Scrollbar(
           thumbVisibility: true,
-          trackVisibility: true,
           controller: horizontalScrollController,
-          child: Scrollbar(
-            thumbVisibility: true,
-            trackVisibility: true,
-            controller: verticalScrollController,
-            notificationPredicate: (notif) => notif.depth == 1,
-            child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Scrollbar(
+              thumbVisibility: true,
               controller: verticalScrollController,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                controller: horizontalScrollController,
-                child: child,
+              // Two-axis scroll solution: https://stackoverflow.com/a/72734055
+              notificationPredicate: (notif) => notif.depth == 1,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: horizontalScrollController,
+                  child: ScrollConfiguration(
+                    // remove duplicate scrollbars on desktop:
+                    // https://github.com/flutter/flutter/issues/108159
+                    behavior: ScrollConfiguration.of(context)
+                        .copyWith(scrollbars: false),
+                    child: SingleChildScrollView(
+                      controller: verticalScrollController,
+                      child: child,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
