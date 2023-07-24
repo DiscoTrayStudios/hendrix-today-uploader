@@ -41,11 +41,12 @@ Future<UploadResult> uploadToFirestore(ExcelRow row) async {
       await match.reference.set(data);
       return UploadResult.success(row);
     }
-  } catch (e) {
-    // e is just an `Object`, this is the only way to know it's a permission error
-    if (e.toString().contains('permission-denied')) {
+  } on FirebaseException catch (firebaseException) {
+    if (firebaseException.code == 'permission-denied') {
       return UploadResult.permissionDenied(row);
     }
+    return UploadResult.unknownError(row);
+  } catch (unknownError) {
     return UploadResult.unknownError(row);
   }
 }
