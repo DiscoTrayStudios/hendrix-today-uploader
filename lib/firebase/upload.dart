@@ -5,7 +5,8 @@ import 'package:hendrix_today_uploader/objects/excel_data.dart';
 const _collectionName = 'events';
 
 enum UploadResultType {
-  success,
+  successfulInsert,
+  successfulUpdate,
   permissionDenied,
   invalidFields,
   unknownError;
@@ -16,8 +17,10 @@ class UploadResult {
   final UploadResultType type;
   final ExcelRow snapshot;
 
-  factory UploadResult.success(ExcelRow row) =>
-      UploadResult(UploadResultType.success, List.unmodifiable(row));
+  factory UploadResult.successfulInsert(ExcelRow row) =>
+      UploadResult(UploadResultType.successfulInsert, List.unmodifiable(row));
+  factory UploadResult.successfulUpdate(ExcelRow row) =>
+      UploadResult(UploadResultType.successfulUpdate, List.unmodifiable(row));
   factory UploadResult.permissionDenied(ExcelRow row) =>
       UploadResult(UploadResultType.permissionDenied, List.unmodifiable(row));
   factory UploadResult.invalidFields(ExcelRow row) =>
@@ -39,10 +42,10 @@ Future<UploadResult> uploadToFirestore(ExcelRow row) async {
         .firstOrNull;
     if (match == null) {
       await db.collection(_collectionName).add(data);
-      return UploadResult.success(row);
+      return UploadResult.successfulInsert(row);
     } else {
       await match.reference.set(data);
-      return UploadResult.success(row);
+      return UploadResult.successfulUpdate(row);
     }
   } on FirebaseException catch (firebaseException) {
     if (firebaseException.code == 'permission-denied') {

@@ -71,6 +71,24 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
         backgroundColor: Theme.of(context).colorScheme.error,
       ));
     }
+    final successfulInserts = results
+        .where((result) => result.type == UploadResultType.successfulInsert);
+    if (successfulInserts.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Successfully created ${successfulInserts.length} new '
+            'item${successfulInserts.length != 1 ? 's' : ''}!'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ));
+    }
+    final successfulUpdates = results
+        .where((result) => result.type == UploadResultType.successfulUpdate);
+    if (successfulUpdates.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Successfully updated ${successfulUpdates.length} '
+            'item${successfulUpdates.length != 1 ? 's' : ''}!'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ));
+    }
   }
 
   @override
