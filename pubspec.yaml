@@ -10,6 +10,7 @@ dependencies:
   cloud_firestore: ^4.8.3
   excel: ^2.1.0
   file_picker: ^5.3.2
+  firebase_auth: ^4.7.1
   firebase_core: ^2.15.0
   flutter:
     sdk: flutter

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
-import 'package:hendrix_today_uploader/objects/upload_item.dart';
+import 'package:hendrix_today_uploader/firebase/upload.dart';
 import 'package:hendrix_today_uploader/widgets/excel_table.dart';
 
 class UploadFileScreen extends StatefulWidget {
@@ -40,7 +40,7 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
         .where((result) => result.type == UploadResultType.invalidFields);
     if (invalidFields.isNotEmpty) {
       String displayIDs = invalidFields
-          .map((result) => result.snapshot.get(idColumn))
+          .map((result) => result.snapshot.get(idColumn) ?? '[missing ID]')
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
@@ -69,6 +69,24 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
             'You do not have upload permission. Please sign in or contact the '
             'maintainer of this upload tool.'),
         backgroundColor: Theme.of(context).colorScheme.error,
+      ));
+    }
+    final successfulInserts = results
+        .where((result) => result.type == UploadResultType.successfulInsert);
+    if (successfulInserts.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Successfully created ${successfulInserts.length} new '
+            'item${successfulInserts.length != 1 ? 's' : ''}!'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ));
+    }
+    final successfulUpdates = results
+        .where((result) => result.type == UploadResultType.successfulUpdate);
+    if (successfulUpdates.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Successfully updated ${successfulUpdates.length} '
+            'item${successfulUpdates.length != 1 ? 's' : ''}!'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ));
     }
   }
