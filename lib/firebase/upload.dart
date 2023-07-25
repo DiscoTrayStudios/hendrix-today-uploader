@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
 
+const _collectionName = 'events';
+
 enum UploadResultType {
   success,
   permissionDenied,
@@ -28,14 +30,15 @@ Future<UploadResult> uploadToFirestore(ExcelRow row) async {
   if (!_isValidExcelRow(row)) return UploadResult.invalidFields(row);
   final data = _generateDocumentSnapshot(row);
   final db = FirebaseFirestore.instance;
-  const collName = 'uploaderTest';
   try {
-    final match =
-        (await db.collection(collName).where('id', isEqualTo: data['id']).get())
-            .docs
-            .firstOrNull;
+    final match = (await db
+            .collection(_collectionName)
+            .where('id', isEqualTo: data['id'])
+            .get())
+        .docs
+        .firstOrNull;
     if (match == null) {
-      await db.collection(collName).add(data);
+      await db.collection(_collectionName).add(data);
       return UploadResult.success(row);
     } else {
       await match.reference.set(data);
@@ -69,7 +72,7 @@ bool _isValidExcelRow(ExcelRow row) {
 Map<String, dynamic> _generateDocumentSnapshot(ExcelRow row) => {
       'id': int.parse(row.get(idColumn)!),
       'title': row.get(titleColumn)!,
-      'description': row.get(descriptionColumn)!,
+      'desc': row.get(descriptionColumn)!,
       'type': row.get(typeColumn)!,
       'contactName': row.get(contactNameColumn)!,
       'contactEmail': row.get(contactEmailColumn)!,
