@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'package:hendrix_today_uploader/firebase_options.dart';
-import 'package:hendrix_today_uploader/screens/main_menu.dart';
+import 'package:hendrix_today_uploader/screens/sign_in.dart';
 
 void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -16,7 +16,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: MainMenuScreen(),
+      home: SignInScreen(),
     );
   }
 }
