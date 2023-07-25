@@ -29,7 +29,7 @@ jobs:
       - name: Add Flutter to PATH
         run: echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
       - name: Setup Git subtree
-        run: git subtree add -P build/web https://github.com/reidst/hendrix-today-uploader.git gh-pages
+        run: git subtree add -P build/web https://github.com/DiscoTrayStudios/hendrix-today-uploader.git gh-pages
       - name: Flutter clean and build
         run: |
           flutter clean
@@ -38,4 +38,4 @@ jobs:
         run: |
           git add .
           git commit -m "automated deployment commit"
-          git subtree push -P build/web https://github.com/reidst/hendrix-today-uploader.git gh-pages
+          git subtree push -P build/web https://github.com/DiscoTrayStudios/hendrix-today-uploader.git gh-pages
