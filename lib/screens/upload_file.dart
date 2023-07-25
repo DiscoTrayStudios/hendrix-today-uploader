@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
-import 'package:hendrix_today_uploader/objects/upload_item.dart';
+import 'package:hendrix_today_uploader/firebase/upload.dart';
 import 'package:hendrix_today_uploader/widgets/excel_table.dart';
 
 class UploadFileScreen extends StatefulWidget {

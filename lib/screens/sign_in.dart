@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:hendrix_today_uploader/screens/main_menu.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
 
   void _trySignIn(BuildContext context, String email, String password) {
-    debugPrint('email: $email, password: $password');
-    Navigator.pushReplacement(context,
-        MaterialPageRoute(builder: (context) => const MainMenuScreen()));
+    final auth = FirebaseAuth.instance;
+    auth.signInWithEmailAndPassword(email: email, password: password).then((_) {
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => const MainMenuScreen()));
+    }).catchError((e) {
+      if (e is FirebaseAuthException) {
+        _displaySignInError(context, e.message ?? 'Sign in failed');
+      }
+    });
+  }
+
+  void _displaySignInError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: Theme.of(context).colorScheme.error,
+    ));
   }
 
   @override
@@ -41,13 +56,15 @@ class SignInScreen extends StatelessWidget {
                   hintText: '•••',
                 ),
                 obscureText: true,
+                onSubmitted: (_) =>
+                    _trySignIn(context, emailTEC.text, passwordTEC.text),
               ),
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: ElevatedButton(
                   onPressed: () =>
                       _trySignIn(context, emailTEC.text, passwordTEC.text),
-                  child: const Text('Sign in (not yet implemented)'),
+                  child: const Text('Sign in'),
                 ),
               ),
               const Spacer(),
