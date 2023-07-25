@@ -40,7 +40,7 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
         .where((result) => result.type == UploadResultType.invalidFields);
     if (invalidFields.isNotEmpty) {
       String displayIDs = invalidFields
-          .map((result) => result.snapshot.get(idColumn))
+          .map((result) => result.snapshot.get(idColumn) ?? '[missing ID]')
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
