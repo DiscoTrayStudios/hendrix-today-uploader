@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:hendrix_today_uploader/objects/excel_data.dart';
+import 'package:hendrix_today_uploader/firebase/constants.dart';
 import 'package:hendrix_today_uploader/firebase/upload.dart';
+import 'package:hendrix_today_uploader/objects/excel_data.dart';
 import 'package:hendrix_today_uploader/widgets/excel_table.dart';
 
 class UploadFileScreen extends StatefulWidget {
@@ -35,12 +36,16 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
     _displayResults(results);
   }
 
+  /// Displays [SnackBar] messages for each [UploadResultType] in [results].
+  ///
+  /// This method lives outside the [_tryUpload] method because [BuildContext]s
+  /// cannot be used in `async` methods.
   void _displayResults(List<UploadResult> results) {
     final invalidFields = results
         .where((result) => result.type == UploadResultType.invalidFields);
     if (invalidFields.isNotEmpty) {
       String displayIDs = invalidFields
-          .map((result) => result.snapshot.get(idColumn) ?? '[missing ID]')
+          .map((result) => result.snapshot.get(idField.index) ?? '[missing ID]')
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
@@ -53,7 +58,7 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
         results.where((result) => result.type == UploadResultType.unknownError);
     if (unknownErrors.isNotEmpty) {
       String displayIDs = unknownErrors
-          .map((result) => result.snapshot.get(idColumn))
+          .map((result) => result.snapshot.get(idField.index))
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(

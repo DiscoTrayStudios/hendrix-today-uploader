@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:hendrix_today_uploader/firebase/constants.dart';
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
-
-const _collectionName = 'events';
 
 enum UploadResultType {
   successfulInsert,
@@ -35,13 +34,13 @@ Future<UploadResult> uploadToFirestore(ExcelRow row) async {
   final db = FirebaseFirestore.instance;
   try {
     final match = (await db
-            .collection(_collectionName)
+            .collection(collectionName)
             .where('id', isEqualTo: data['id'])
             .get())
         .docs
         .firstOrNull;
     if (match == null) {
-      await db.collection(_collectionName).add(data);
+      await db.collection(collectionName).add(data);
       return UploadResult.successfulInsert(row);
     } else {
       await match.reference.set(data);
@@ -58,31 +57,34 @@ Future<UploadResult> uploadToFirestore(ExcelRow row) async {
 }
 
 bool _isValidExcelRow(ExcelRow row) {
-  if (row.get(idColumn) == null) return false;
-  if (int.tryParse(row.get(idColumn)!) == null) return false;
-  if (row.get(titleColumn) == null) return false;
-  if (row.get(descriptionColumn) == null) return false;
-  if (row.get(typeColumn) == null) return false;
-  if (row.get(contactNameColumn) == null) return false;
-  if (row.get(contactEmailColumn) == null) return false;
-  if (row.get(beginPostingColumn) == null) return false;
-  if (DateTime.tryParse(row.get(beginPostingColumn)!) == null) return false;
-  if (row.get(endPostingColumn) == null) return false;
-  if (DateTime.tryParse(row.get(endPostingColumn)!) == null) return false;
+  if (row.get(idField.index) == null) return false;
+  if (int.tryParse(row.get(idField.index)!) == null) return false;
+  if (row.get(titleField.index) == null) return false;
+  if (row.get(descField.index) == null) return false;
+  if (row.get(typeField.index) == null) return false;
+  if (row.get(contactNameField.index) == null) return false;
+  if (row.get(contactEmailField.index) == null) return false;
+  if (row.get(beginPostingField.index) == null) return false;
+  if (DateTime.tryParse(row.get(beginPostingField.index)!) == null) {
+    return false;
+  }
+  if (row.get(endPostingField.index) == null) return false;
+  if (DateTime.tryParse(row.get(endPostingField.index)!) == null) return false;
   return true;
 }
 
 Map<String, dynamic> _generateDocumentSnapshot(ExcelRow row) => {
-      'id': int.parse(row.get(idColumn)!),
-      'title': row.get(titleColumn)!,
-      'desc': row.get(descriptionColumn)!,
-      'type': row.get(typeColumn)!,
-      'contactName': row.get(contactNameColumn)!,
-      'contactEmail': row.get(contactEmailColumn)!,
-      'beginPosting': DateTime.parse(row.get(beginPostingColumn)!),
-      'endPosting': DateTime.parse(row.get(endPostingColumn)!),
-      'date': DateTime.tryParse(row.get(dateColumn) ?? ''),
-      'time': row.get(timeColumn),
-      'location': row.get(locationColumn),
-      'applyDeadline': DateTime.tryParse(row.get(applyDeadlineColumn) ?? ''),
+      'id': int.parse(row.get(idField.index)!),
+      'title': row.get(titleField.index)!,
+      'desc': row.get(descField.index)!,
+      'type': row.get(typeField.index)!,
+      'contactName': row.get(contactNameField.index)!,
+      'contactEmail': row.get(contactEmailField.index)!,
+      'beginPosting': DateTime.parse(row.get(beginPostingField.index)!),
+      'endPosting': DateTime.parse(row.get(endPostingField.index)!),
+      'date': DateTime.tryParse(row.get(dateField.index) ?? ''),
+      'time': row.get(timeField.index),
+      'location': row.get(locationField.index),
+      'applyDeadline':
+          DateTime.tryParse(row.get(applyDeadlineField.index) ?? ''),
     };

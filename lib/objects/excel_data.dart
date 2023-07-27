@@ -1,49 +1,6 @@
 import 'package:excel/excel.dart';
 
-// The following constants should be defined in accordance with the Excel sheet
-// output by the submission form: column A = 0, B = 1, etc.
-const idColumn = 0;
-const titleColumn = 8;
-const descriptionColumn = 15;
-const typeColumn = 11;
-const contactNameColumn = 6;
-const contactEmailColumn = 7;
-const beginPostingColumn = 9;
-const endPostingColumn = 10;
-const dateColumn = 12;
-const timeColumn = 14;
-const locationColumn = 17;
-const applyDeadlineColumn = 13;
-
-// Keep the following two lists in the same order
-const orderedColumnIndicies = [
-  idColumn,
-  titleColumn,
-  descriptionColumn,
-  typeColumn,
-  contactNameColumn,
-  contactEmailColumn,
-  beginPostingColumn,
-  endPostingColumn,
-  dateColumn,
-  timeColumn,
-  locationColumn,
-  applyDeadlineColumn,
-];
-const orderedColumnNames = [
-  'ID',
-  'Title',
-  'Description',
-  'Type',
-  'Contact name',
-  'Contact email',
-  'First day to post',
-  'Last day to post',
-  'Date (optional)',
-  'Time (optional)',
-  'Location (optional)',
-  'Application deadline (optional)',
-];
+import 'package:hendrix_today_uploader/firebase/constants.dart';
 
 typedef ExcelRow = List<String?>;
 
@@ -52,7 +9,8 @@ extension NullSafeGet on ExcelRow {
 }
 
 extension Format on ExcelRow {
-  ExcelRow get format => orderedColumnIndicies.map((i) => get(i)).toList();
+  ExcelRow get format =>
+      orderedFields.map((field) => get(field.index)).toList();
 }
 
 class ExcelData {
@@ -62,8 +20,8 @@ class ExcelData {
         .map((row) => row.map((cell) => cell?.value?.toString()).toList())
         .toList();
     // sort by ID, with null/blank values first
-    rows.sort((a, b) => (int.tryParse(a.get(idColumn) ?? '') ?? -1)
-        .compareTo(int.tryParse(b.get(idColumn) ?? '') ?? -1));
+    rows.sort((a, b) => (int.tryParse(a.get(idField.index) ?? '') ?? -1)
+        .compareTo(int.tryParse(b.get(idField.index) ?? '') ?? -1));
   }
   late final List<ExcelRow> rows;
   int get rowCount => rows.length;
