@@ -11,7 +11,7 @@ const FieldRecord contactNameField = (index: 6, name: 'Contact name');
 const FieldRecord contactEmailField = (index: 7, name: 'Contact email');
 const FieldRecord beginPostingField = (index: 9, name: 'First day to post');
 const FieldRecord endPostingField = (index: 10, name: 'Last day to post');
-const FieldRecord dateField = (index: 12, name: 'Date (optional)');
+const FieldRecord dateField = (index: 12, name: 'Date');
 const FieldRecord timeField = (index: 14, name: 'Time (optional)');
 const FieldRecord locationField = (index: 17, name: 'Location (optional)');
 const FieldRecord applyDeadlineField =
@@ -22,7 +22,7 @@ const FieldRecord applyDeadlineField =
 /// The `index` of each field corresponds to the column index of the submission
 /// form's Excel output at which the associated field data exists (where column
 /// A = 0).
-const orderedFields = <FieldRecord>[
+final orderedFields = List<FieldRecord>.unmodifiable(const [
   idField,
   titleField,
   descField,
@@ -35,4 +35,4 @@ const orderedFields = <FieldRecord>[
   timeField,
   locationField,
   applyDeadlineField,
-];
+]);

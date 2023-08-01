@@ -65,6 +65,7 @@ bool _isValidExcelRow(ExcelRow row) {
   if (row.get(contactNameField.index) == null) return false;
   if (row.get(contactEmailField.index) == null) return false;
   if (row.get(beginPostingField.index) == null) return false;
+  if (row.get(dateField.index) == null) return false;
   if (DateTime.tryParse(row.get(beginPostingField.index)!) == null) {
     return false;
   }
@@ -82,7 +83,7 @@ Map<String, dynamic> _generateDocumentSnapshot(ExcelRow row) => {
       'contactEmail': row.get(contactEmailField.index)!,
       'beginPosting': DateTime.parse(row.get(beginPostingField.index)!),
       'endPosting': DateTime.parse(row.get(endPostingField.index)!),
-      'date': DateTime.tryParse(row.get(dateField.index) ?? ''),
+      'date': DateTime.parse(row.get(dateField.index)!),
       'time': row.get(timeField.index),
       'location': row.get(locationField.index),
       'applyDeadline':
