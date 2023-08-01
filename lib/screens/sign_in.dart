@@ -5,7 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hendrix_today_uploader/screens/main_menu.dart';
 
 class SignInScreen extends StatelessWidget {
-  const SignInScreen({super.key});
+  const SignInScreen({super.key, this.message});
+  final String? message;
 
   void _trySignIn(BuildContext context, String email, String password) {
     final auth = FirebaseAuth.instance;
@@ -42,6 +43,11 @@ class SignInScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (message != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(message!),
+                ),
               TextField(
                 controller: emailTEC,
                 decoration: const InputDecoration(
