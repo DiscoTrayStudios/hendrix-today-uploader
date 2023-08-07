@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
+import 'package:hendrix_today_uploader/screens/sign_in.dart';
 import 'package:hendrix_today_uploader/screens/upload_file.dart';
 import 'package:hendrix_today_uploader/screens/view_databse.dart';
 
@@ -46,6 +48,27 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         MaterialPageRoute(builder: (context) => const DatabaseViewScreen()));
   }
 
+  void _resetPassword() {
+    final auth = FirebaseAuth.instance;
+    auth.sendPasswordResetEmail(email: auth.currentUser!.email!);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+          builder: (context) => SignInScreen(
+              message: 'A password reset email has been sent to '
+                  '${auth.currentUser!.email!}. Look for an email from '
+                  'noreply@hendrix-today-app.firebaseapp.com; check your spam '
+                  'folder if it does not show up.')),
+    );
+  }
+
+  void _signOut() {
+    FirebaseAuth.instance.signOut().then((_) => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SignInScreen()),
+        ));
+  }
+
   void _showBadFilePopup() {
     showDialog(
       context: context,
@@ -76,6 +99,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(flex: 10),
+            const Text("Editorial"),
+            const Spacer(),
             ElevatedButton(
               onPressed: _selectExcelFile,
               child: const Text("Select an Excel file to upload"),
@@ -84,6 +109,18 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             ElevatedButton(
               onPressed: _goToDatabaseViewPage,
               child: const Text("View the database"),
+            ),
+            const Spacer(flex: 2),
+            const Text("User"),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: _resetPassword,
+              child: const Text("Reset password"),
+            ),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: _signOut,
+              child: const Text("Sign out"),
             ),
             const Spacer(flex: 10),
           ],
