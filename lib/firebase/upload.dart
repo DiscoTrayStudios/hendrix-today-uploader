@@ -6,8 +6,10 @@ import 'package:hendrix_today_uploader/objects/excel_data.dart';
 enum UploadResultType {
   successfulInsert,
   successfulUpdate,
+  successfulDelete,
   permissionDenied,
   invalidFields,
+  idNotPresent,
   unknownError;
 }
 
@@ -20,10 +22,14 @@ class UploadResult {
       UploadResult(UploadResultType.successfulInsert, List.unmodifiable(row));
   factory UploadResult.successfulUpdate(ExcelRow row) =>
       UploadResult(UploadResultType.successfulUpdate, List.unmodifiable(row));
+  factory UploadResult.successfulDelete(ExcelRow row) =>
+      UploadResult(UploadResultType.successfulDelete, List.unmodifiable(row));
   factory UploadResult.permissionDenied(ExcelRow row) =>
       UploadResult(UploadResultType.permissionDenied, List.unmodifiable(row));
   factory UploadResult.invalidFields(ExcelRow row) =>
       UploadResult(UploadResultType.invalidFields, List.unmodifiable(row));
+  factory UploadResult.idNotPresent(ExcelRow row) =>
+      UploadResult(UploadResultType.idNotPresent, List.unmodifiable(row));
   factory UploadResult.unknownError(ExcelRow row) =>
       UploadResult(UploadResultType.unknownError, List.unmodifiable(row));
 }
@@ -89,3 +95,26 @@ Map<String, dynamic> _generateDocumentSnapshot(ExcelRow row) => {
       'applyDeadline':
           DateTime.tryParse(row.get(applyDeadlineField.index) ?? ''),
     };
+
+Future<UploadResult> deleteFromFirestore(ExcelRow row) async {
+  final id = int.tryParse(row.get(idField.index) ?? '');
+  if (id == null) return UploadResult.invalidFields(row);
+  final db = FirebaseFirestore.instance;
+  try {
+    final matches =
+        (await db.collection(collectionName).where('id', isEqualTo: id).get())
+            .docs;
+    if (matches.isEmpty) return UploadResult.idNotPresent(row);
+    for (final match in matches) {
+      await match.reference.delete();
+    }
+  } on FirebaseException catch (firebaseException) {
+    if (firebaseException.code == 'permission-denied') {
+      return UploadResult.permissionDenied(row);
+    }
+    return UploadResult.unknownError(row);
+  } catch (unknownError) {
+    return UploadResult.unknownError(row);
+  }
+  return UploadResult.successfulDelete(row);
+}
