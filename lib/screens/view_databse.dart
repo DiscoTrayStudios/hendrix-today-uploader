@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hendrix_today_uploader/firebase/database_item.dart';
 
 import 'package:hendrix_today_uploader/firebase/download.dart';
-import 'package:hendrix_today_uploader/firebase/constants.dart';
 import 'package:hendrix_today_uploader/firebase/upload.dart';
-import 'package:hendrix_today_uploader/widgets/table_item.dart';
+import 'package:hendrix_today_uploader/firebase/upload_result.dart';
+import 'package:hendrix_today_uploader/widgets/edit_dialog.dart';
 import 'package:hendrix_today_uploader/widgets/table_scroller.dart';
 
 class DatabaseViewScreen extends StatefulWidget {
@@ -14,8 +15,11 @@ class DatabaseViewScreen extends StatefulWidget {
 }
 
 class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
-  List<FirestoreRow>? _items;
+  List<DatabaseItem>? _items;
   bool _deleteInProgress = false;
+  // TODO track local changes (edited items, deleted items)
+  // TODO indicate changed items by color (red = deleted, blue = edited?)
+  // TODO add an "Apply Changes to DB" button
 
   @override
   void initState() {
@@ -42,7 +46,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
     }
     final today = DateTime.now();
     final oldItems = _items!
-        .where((row) => undoFormatDate(row[7])?.isBefore(today) ?? false);
+        .where((item) => item.endPosting.isBefore(today));
     final deleteResults = <UploadResult>[];
     for (final item in oldItems) {
       deleteResults.add(await deleteFromFirestore(item));
@@ -76,7 +80,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
         .where((result) => result.type == UploadResultType.invalidFields);
     if (invalidFields.isNotEmpty) {
       String displayIDs = invalidFields
-          .map((result) => result.snapshot[idField.index] ?? '[missing ID]')
+          .map((result) => result.dbItem.id)
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
@@ -89,7 +93,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
         results.where((result) => result.type == UploadResultType.idNotPresent);
     if (idsNotPresent.isNotEmpty) {
       String displayIDs = idsNotPresent
-          .map((result) => result.snapshot[idField.index])
+          .map((result) => result.dbItem.id)
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
@@ -102,7 +106,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
         results.where((result) => result.type == UploadResultType.unknownError);
     if (unknownErrors.isNotEmpty) {
       String displayIDs = unknownErrors
-          .map((result) => result.snapshot[idField.index])
+          .map((result) => result.dbItem.id)
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
@@ -155,29 +159,49 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
               const Center(child: Text('Loading...'))
             else
               TableScroller(
-                child: Table(
-                  border: TableBorder.all(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  defaultColumnWidth: const IntrinsicColumnWidth(),
-                  children: [
-                    TableRow(
-                        children: orderedFields
-                            .map((field) => Center(
-                                  child: TableItem(
-                                    cellValue: field.name,
-                                  ),
-                                ))
-                            .toList()),
-                    ..._items!.map((row) => TableRow(
-                          children: row
-                              .map((item) => TableItem(
-                                    cellValue: item,
-                                    maxLength: 40,
-                                  ))
-                              .toList(),
+                child: DataTable(
+                  columns: DatabaseItem.fieldTitles
+                    .map((title) => DataColumn(
+                      label: Text(title),
+                    ))
+                    .toList(),
+                  rows: _items!
+                    .map((dbItem) => DataRow(
+                      cells: dbItem
+                        .fieldContents
+                        .map((dynamic data) => DataCell(
+                          Container(
+                            constraints: const BoxConstraints(
+                              maxWidth: 300,
+                              maxHeight: 40,
+                            ),
+                            child: Text(
+                              switch (data) {
+                                null => "",
+                                DateTime dt => DatabaseItem.formatDate(dt),
+                                dynamic otherType => otherType.toString(),
+                              },
+                              // data?.toString() ?? "",
+                              overflow: TextOverflow.fade,
+                            ),
+                          ),
+                          onTap: (){
+                            print("Clicked on cell containing: $data");
+                            print(
+                              "Clicked cell associated with DatabaseItem: "
+                              "$dbItem"
+                            );
+                            showDialog(
+                              context: context,
+                              builder: (context) => DatabaseEditDialog(
+                                dbItem: dbItem,
+                              ),
+                            );
+                          },
                         ))
-                  ],
+                        .toList()
+                    ))
+                    .toList(),
                 ),
               ),
           ],
