@@ -4,6 +4,8 @@ import 'package:hendrix_today_uploader/firebase/constants.dart';
 import 'package:hendrix_today_uploader/firebase/database_item.dart';
 import 'package:hendrix_today_uploader/firebase/upload_result.dart';
 
+/// Uploads a [DatabaseItem] to Firestore, or edits the existing one if the ID
+/// of the given item is already present in Firestore.
 Future<UploadResult> uploadToFirestore(DatabaseItem dbItem) async {
   final data = _generateDocumentSnapshot(dbItem);
   final db = FirebaseFirestore.instance;
@@ -32,6 +34,7 @@ Future<UploadResult> uploadToFirestore(DatabaseItem dbItem) async {
   }
 }
 
+/// Convert a [DatabaseItem] into a JSON-like format compatible with Firestore.
 Map<String, dynamic> _generateDocumentSnapshot(DatabaseItem dbItem) => {
   "id": dbItem.id,
   "title": dbItem.title,
@@ -47,6 +50,8 @@ Map<String, dynamic> _generateDocumentSnapshot(DatabaseItem dbItem) => {
   "applyDeadline": dbItem.applyDeadline,
 };
 
+/// Delete a [DatabaseItem] from Firestore. Does nothing to the database if the
+/// ID is not present in Firestore.
 Future<UploadResult> deleteFromFirestore(DatabaseItem dbItem) async {
   final id = dbItem.id;
   final db = FirebaseFirestore.instance;

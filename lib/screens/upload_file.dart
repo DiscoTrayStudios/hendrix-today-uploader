@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:hendrix_today_uploader/firebase/constants.dart';
 import 'package:hendrix_today_uploader/firebase/upload.dart';
+import 'package:hendrix_today_uploader/firebase/upload_result.dart';
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
 import 'package:hendrix_today_uploader/widgets/excel_table.dart';
 

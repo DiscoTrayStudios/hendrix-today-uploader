@@ -10,7 +10,7 @@ extension NullSafeGet on ExcelRow {
 
 extension Format on ExcelRow {
   ExcelRow get format =>
-      orderedFields.map((field) => get(field.index)).toList();
+      orderedFields.map((field) => get(field.column)).toList();
 }
 
 class ExcelData {
@@ -20,8 +20,8 @@ class ExcelData {
         .map((row) => row.map((cell) => cell?.value?.toString()).toList())
         .toList();
     // sort by ID, with null/blank values first
-    rows.sort((a, b) => (int.tryParse(a.get(idField.index) ?? '') ?? -1)
-        .compareTo(int.tryParse(b.get(idField.index) ?? '') ?? -1));
+    rows.sort((a, b) => (int.tryParse(a.get(idField.column) ?? '') ?? -1)
+        .compareTo(int.tryParse(b.get(idField.column) ?? '') ?? -1));
   }
   late final List<ExcelRow> rows;
   int get rowCount => rows.length;

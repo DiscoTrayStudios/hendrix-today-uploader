@@ -79,6 +79,23 @@ final class DatabaseItem {
       "Location (optional)",
       "Application deadline (optional)",
     ];
+  
+  /// The types of the fields in a [DatabaseItem] in the same order and with the
+  /// same length as [DatabaseItem.fieldTitles].
+  static List<Type> get fieldTypes => [
+      int,
+      String,
+      String,
+      DatabaseItemType,
+      String,
+      String,
+      DateTime,
+      DateTime,
+      DateTime,
+      String,
+      String,
+      DateTime,
+    ];
 
   /// The contents of this [DatabaseItem] in the same order and with the same 
   /// length as [DatabaseItem.fieldTitles].
@@ -96,6 +113,21 @@ final class DatabaseItem {
       location,
       applyDeadline,
     ];
+  
+  /// Does this [DatabaseItem] have all the same field data as [other]?
+  bool equals(DatabaseItem other) =>
+    id == other.id &&
+    title == other.title &&
+    desc == other.desc &&
+    type == other.type &&
+    contactName == other.contactName &&
+    contactEmail == other.contactEmail &&
+    beginPosting == other.beginPosting &&
+    endPosting == other.endPosting &&
+    date == other.date &&
+    time == other.time &&
+    location == other.location &&
+    applyDeadline == other.applyDeadline;
 
   /// A compact standardized date format: YYYY-MMM-D, in which MMM is a three-
   /// letter abbreviation of the month's English name, and D is the numeric day

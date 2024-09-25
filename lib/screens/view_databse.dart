@@ -15,9 +15,10 @@ class DatabaseViewScreen extends StatefulWidget {
 }
 
 class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
-  List<DatabaseItem>? _items;
-  bool _deleteInProgress = false;
-  // TODO track local changes (edited items, deleted items)
+  List<DatabaseItem>? _retrievedItems;
+  final List<DatabaseItem> _itemsToEdit = List.empty(growable: true);
+  final List<DatabaseItem> _itemsToDelete = List.empty(growable: true);
+  bool _dbUpdateInProgress = false;
   // TODO indicate changed items by color (red = deleted, blue = edited?)
   // TODO add an "Apply Changes to DB" button
 
@@ -31,21 +32,30 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
     final items = await getFirestoreContents();
     if (mounted) {
       setState(() {
-        _items = items;
+        _retrievedItems = items;
       });
     }
   }
 
+  // void _markOldEventsToDelete() {
+  //   final today = DateTime.now();
+  //   for (final itemToCheck in _retrievedItems ?? <DatabaseItem>[]) {
+  //     if (itemToCheck.endPosting.isBefore(today)) {
+  //       if (_itemsToDelete.where((item) => item.))
+  //     }
+  //   }
+  // }
+
   void _tryDeleteOldEvents() async {
-    if (_deleteInProgress) return;
-    if (_items == null) return;
+    if (_dbUpdateInProgress) return;
+    if (_retrievedItems == null) return;
     if (mounted) {
       setState(() {
-        _deleteInProgress = true;
+        _dbUpdateInProgress = true;
       });
     }
     final today = DateTime.now();
-    final oldItems = _items!
+    final oldItems = _retrievedItems!
         .where((item) => item.endPosting.isBefore(today));
     final deleteResults = <UploadResult>[];
     for (final item in oldItems) {
@@ -54,18 +64,44 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
     }
     if (mounted) {
       setState(() {
-        _deleteInProgress = false;
+        _dbUpdateInProgress = false;
       });
     }
-    _displayDeleteResults(deleteResults);
+    _displayUpdateResults(deleteResults);
+    _getFirestoreContents();
+  }
+
+  void _applyChanges() async {
+    if (_dbUpdateInProgress) {
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        _dbUpdateInProgress = true;
+      });
+    }
+    final changeResults = <UploadResult>[];
+    for (final itemToDelete in _itemsToDelete) {
+      changeResults.add(await deleteFromFirestore(itemToDelete));
+      if (changeResults.last.type == UploadResultType.permissionDenied) {
+        break;
+      }
+    }
+    for (final itemToEdit in _itemsToEdit) {
+      changeResults.add(await uploadToFirestore(itemToEdit));
+      if (changeResults.last.type == UploadResultType.permissionDenied) {
+        break;
+      }
+    }
+    _displayUpdateResults(changeResults);
     _getFirestoreContents();
   }
 
   /// Displays [SnackBar] messages for each [UploadResultType] in [results].
   ///
-  /// This method lives outside the [_tryDeleteOldEvents] method because
+  /// This method lives outside the deletion and modification methods because
   /// [BuildContext]s cannot be used in `async` methods.
-  void _displayDeleteResults(List<UploadResult> results) {
+  void _displayUpdateResults(List<UploadResult> results) {
     if (results
         .any((result) => result.type == UploadResultType.permissionDenied)) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -123,6 +159,23 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
             'item${successfulDeletes.length != 1 ? 's' : ''}!'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ));
+      final deletedIDs = successfulDeletes
+        .map((delete) => delete.dbItem.id)
+        .toList();
+      _itemsToDelete.removeWhere((item) => deletedIDs.contains(item.id));
+    }
+    final successfulUpdates = results
+        .where((result) => result.type == UploadResultType.successfulUpdate);
+    if (successfulUpdates.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Successfully updated ${successfulUpdates.length} '
+            'item${successfulUpdates.length != 1 ? 's' : ''}!'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ));
+      final updatedIDs = successfulUpdates
+        .map((update) => update.dbItem.id)
+        .toList();
+      _itemsToEdit.removeWhere((item) => updatedIDs.contains(item.id));
     }
   }
 
@@ -139,23 +192,29 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (_items != null)
+            if (_retrievedItems != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
                 child: Row(
                   children: [
-                    Text('There are ${_items!.length} items in the database.'),
+                    Text('There are ${_retrievedItems!.length} items in the database.'),
                     const Spacer(),
                     ElevatedButton(
                       onPressed: _tryDeleteOldEvents,
-                      child: _deleteInProgress
-                          ? const Text('Deleting...')
+                      child: _dbUpdateInProgress
+                          ? const Text('Upload in progress...')
                           : const Text('Delete all old events'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _applyChanges,
+                      child: _dbUpdateInProgress
+                          ? const Text("Upload in progress...")
+                          : const Text("Apply changes"),
                     ),
                   ],
                 ),
               ),
-            if (_items == null)
+            if (_retrievedItems == null)
               const Center(child: Text('Loading...'))
             else
               TableScroller(
@@ -165,38 +224,45 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                       label: Text(title),
                     ))
                     .toList(),
-                  rows: _items!
-                    .map((dbItem) => DataRow(
-                      cells: dbItem
+                  rows: _retrievedItems!
+                    .map((rowItem) => DataRow(
+                      cells: rowItem
                         .fieldContents
-                        .map((dynamic data) => DataCell(
+                        .map((dynamic cellData) => DataCell(
                           Container(
                             constraints: const BoxConstraints(
                               maxWidth: 300,
                               maxHeight: 40,
                             ),
                             child: Text(
-                              switch (data) {
+                              switch (cellData) {
                                 null => "",
                                 DateTime dt => DatabaseItem.formatDate(dt),
                                 dynamic otherType => otherType.toString(),
                               },
-                              // data?.toString() ?? "",
                               overflow: TextOverflow.fade,
                             ),
                           ),
-                          onTap: (){
-                            print("Clicked on cell containing: $data");
+                          onTap: () async {
+                            print("Clicked on cell containing: $cellData");
                             print(
                               "Clicked cell associated with DatabaseItem: "
-                              "$dbItem"
+                              "$rowItem"
                             );
-                            showDialog(
+                            await showDialog<DatabaseItem?>(
                               context: context,
                               builder: (context) => DatabaseEditDialog(
-                                dbItem: dbItem,
+                                dbItem: rowItem,
                               ),
-                            );
+                            ).then((itemAfterEdit) {
+                              switch (itemAfterEdit) {
+                                case null:
+                                  _itemsToDelete.add(rowItem);
+                                  break;
+                                case DatabaseItem editedItem:
+                                  _itemsToEdit.add(editedItem);
+                              }
+                            });
                           },
                         ))
                         .toList()
