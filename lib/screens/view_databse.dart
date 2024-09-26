@@ -19,8 +19,6 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
   final List<DatabaseItem> _itemsToEdit = List.empty(growable: true);
   final List<DatabaseItem> _itemsToDelete = List.empty(growable: true);
   bool _dbUpdateInProgress = false;
-  // TODO indicate changed items by color (red = deleted, blue = edited?)
-  // TODO add an "Apply Changes to DB" button
 
   @override
   void initState() {
@@ -37,38 +35,68 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
     }
   }
 
-  // void _markOldEventsToDelete() {
-  //   final today = DateTime.now();
-  //   for (final itemToCheck in _retrievedItems ?? <DatabaseItem>[]) {
-  //     if (itemToCheck.endPosting.isBefore(today)) {
-  //       if (_itemsToDelete.where((item) => item.))
-  //     }
-  //   }
-  // }
+  /// Given an original item and an edited version, decide whether to add or
+  /// remove the edited version to [_itemsToEdit] and whether to add or remove
+  /// the original to [_itemsToDelete].
+  void _afterEditing(DatabaseItem original, DatabaseItem? editedItem) {
+    if (editedItem case DatabaseItem newItem) {
+      _itemsToDelete
+        .removeWhere((item) =>
+          item.id == newItem.id
+        );
+      _itemsToEdit
+        .removeWhere((item) =>
+          item.id == newItem.id
+        );
+      if (!newItem.equals(original)) {
+        _itemsToEdit.add(newItem);
+      }
+    } else {
+      if (_markedForDeletion(original)) {
+        _itemsToDelete
+          .removeWhere((item) =>
+            item.id == original.id
+          );
+      } else {
+        _itemsToDelete.add(original);
+      }
+    }
+    print("items to edit: $_itemsToEdit");
+    print("items to delete: $_itemsToDelete");
+  }
 
-  void _tryDeleteOldEvents() async {
-    if (_dbUpdateInProgress) return;
-    if (_retrievedItems == null) return;
-    if (mounted) {
-      setState(() {
-        _dbUpdateInProgress = true;
-      });
-    }
+  /// Has an item been marked for editing which has the same ID as [dbItem]?
+  bool _markedForEdit(DatabaseItem dbItem) => _itemsToEdit
+    .map((item) => item.id)
+    .contains(dbItem.id);
+  
+  /// Has an item been marked for deletion which has the same ID as [dbItem]?
+  bool _markedForDeletion(DatabaseItem dbItem) => _itemsToDelete
+    .map((item) => item.id)
+    .contains(dbItem.id);
+
+  void _markOldEventsToDelete() {
     final today = DateTime.now();
-    final oldItems = _retrievedItems!
-        .where((item) => item.endPosting.isBefore(today));
-    final deleteResults = <UploadResult>[];
-    for (final item in oldItems) {
-      deleteResults.add(await deleteFromFirestore(item));
-      if (deleteResults.last.type == UploadResultType.permissionDenied) break;
+    for (final itemToCheck in _retrievedItems ?? <DatabaseItem>[]) {
+      if (itemToCheck.endPosting.isBefore(today)) {
+        if (!_itemsToDelete.map((item) => item.id).contains(itemToCheck.id)) {
+          _itemsToDelete.add(itemToCheck);
+        }
+      }
     }
-    if (mounted) {
-      setState(() {
-        _dbUpdateInProgress = false;
-      });
-    }
-    _displayUpdateResults(deleteResults);
-    _getFirestoreContents();
+  }
+
+  /// Checks to see if there is a [DatabaseItem] with the same ID as [dbItem]
+  /// that has been edited this session. If so, the newer version is returned;
+  /// otherwise, the original item is returned.
+  DatabaseItem _latestVersion(DatabaseItem dbItem) {
+    final editedVersion = _itemsToEdit
+      .where((item) => item.id == dbItem.id)
+      .firstOrNull;
+    return switch (editedVersion) {
+      null => dbItem,
+      DatabaseItem latestVersion => latestVersion,
+    };
   }
 
   void _applyChanges() async {
@@ -200,7 +228,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                     Text('There are ${_retrievedItems!.length} items in the database.'),
                     const Spacer(),
                     ElevatedButton(
-                      onPressed: _tryDeleteOldEvents,
+                      onPressed: _markOldEventsToDelete,
                       child: _dbUpdateInProgress
                           ? const Text('Upload in progress...')
                           : const Text('Delete all old events'),
@@ -225,48 +253,52 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                     ))
                     .toList(),
                   rows: _retrievedItems!
-                    .map((rowItem) => DataRow(
-                      cells: rowItem
-                        .fieldContents
-                        .map((dynamic cellData) => DataCell(
-                          Container(
-                            constraints: const BoxConstraints(
-                              maxWidth: 300,
-                              maxHeight: 40,
-                            ),
-                            child: Text(
-                              switch (cellData) {
-                                null => "",
-                                DateTime dt => DatabaseItem.formatDate(dt),
-                                dynamic otherType => otherType.toString(),
-                              },
-                              overflow: TextOverflow.fade,
-                            ),
-                          ),
-                          onTap: () async {
-                            print("Clicked on cell containing: $cellData");
-                            print(
-                              "Clicked cell associated with DatabaseItem: "
-                              "$rowItem"
-                            );
-                            await showDialog<DatabaseItem?>(
-                              context: context,
-                              builder: (context) => DatabaseEditDialog(
-                                dbItem: rowItem,
+                    .map((originalRowItem) {
+                      final rowItem = _latestVersion(originalRowItem);
+                      return DataRow(
+                        cells: rowItem
+                          .fieldContents
+                          .map((dynamic cellData) => DataCell(
+                            Container(
+                              constraints: const BoxConstraints(
+                                maxWidth: 300,
+                                maxHeight: 40,
                               ),
-                            ).then((itemAfterEdit) {
-                              switch (itemAfterEdit) {
-                                case null:
-                                  _itemsToDelete.add(rowItem);
-                                  break;
-                                case DatabaseItem editedItem:
-                                  _itemsToEdit.add(editedItem);
-                              }
-                            });
-                          },
-                        ))
-                        .toList()
-                    ))
+                              child: Text(
+                                switch (cellData) {
+                                  null => "",
+                                  DateTime dt => DatabaseItem.formatDate(dt),
+                                  dynamic otherType => otherType.toString(),
+                                },
+                                style: TextStyle(
+                                  color: _markedForDeletion(rowItem)
+                                    ? Theme.of(context).colorScheme.error
+                                    : null,
+                                  fontWeight: _markedForEdit(rowItem)
+                                          || _markedForDeletion(rowItem)
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                ),
+                                overflow: TextOverflow.fade,
+                              ),
+                            ),
+                            onTap: () async {
+                              await showDialog<DatabaseItem?>(
+                                context: context,
+                                builder: (context) => DatabaseEditDialog(
+                                  dbItem: rowItem,
+                                  isDeleted: _markedForDeletion(rowItem),
+                                ),
+                              ).then((editedItem) {
+                                setState(() {
+                                  _afterEditing(originalRowItem, editedItem);
+                                });
+                              });
+                            },
+                          ))
+                          .toList(),
+                      );
+                    })
                     .toList(),
                 ),
               ),

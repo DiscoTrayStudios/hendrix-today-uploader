@@ -64,7 +64,8 @@ final class DatabaseItem {
   /// The number of fields a [DatabaseItem] has.
   static int fieldCount = fieldTitles.length;
 
-  /// Descriptive labels for the fields of a [DatabaseItem].
+  /// Descriptive labels for the fields of a [DatabaseItem]. Please don't change
+  /// these.
   static List<String> get fieldTitles => [
       "ID",
       "Title",
@@ -128,6 +129,22 @@ final class DatabaseItem {
     time == other.time &&
     location == other.location &&
     applyDeadline == other.applyDeadline;
+
+  @override
+  String toString() =>
+    "DatabaseItem("
+    "id=$id, "
+    "title='$title',"
+    "desc='$desc',"
+    "type=$type,"
+    "contactName='$contactName',"
+    "conatactEmail='$contactEmail',"
+    "beginPosting=$beginPosting,"
+    "endPosting=$endPosting,"
+    "date=$date,"
+    "time=${switch (time) { null => "null", String t => "'$t'"}},"
+    "location=${switch (location) { null => "null", String l => "'$l'"}},"
+    "applyDeadline=${applyDeadline ?? "null"})";
 
   /// A compact standardized date format: YYYY-MMM-D, in which MMM is a three-
   /// letter abbreviation of the month's English name, and D is the numeric day

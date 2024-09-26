@@ -1,63 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:hendrix_today_uploader/firebase/database_item.dart';
 
-class DatabaseEditDialog extends StatelessWidget {
-  const DatabaseEditDialog({super.key, required this.dbItem});
+class DatabaseEditDialog extends StatefulWidget {
+  const DatabaseEditDialog({
+    super.key,
+    required this.dbItem,
+    required this.isDeleted,
+  });
   final DatabaseItem dbItem;
+  final bool isDeleted;
+
+  @override
+  State<DatabaseEditDialog> createState() => _DatabaseEditDialogState();
+}
+
+class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
+
+  late final TextEditingController titleEditingController;
+  late final TextEditingController descriptionEditingController;
+  late final TextEditingController timeEditingController;
+  late final TextEditingController locationEditingController;
+
+  @override
+  void initState() {
+    super.initState();
+    titleEditingController = TextEditingController(
+      text: widget.dbItem.title,
+    );
+    descriptionEditingController = TextEditingController(
+      text: widget.dbItem.desc,
+    );
+    timeEditingController = TextEditingController(
+      text: widget.dbItem.time,
+    );
+    locationEditingController = TextEditingController(
+      text: widget.dbItem.location,
+    );
+  }
+
+  @override
+  void dispose() {
+    titleEditingController.dispose();
+    descriptionEditingController.dispose();
+    timeEditingController.dispose();
+    locationEditingController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final titleEditingController = TextEditingController(
-      text: dbItem.title,
-    );
-    final descriptionEditingController = TextEditingController(
-      text: dbItem.desc,
-    );
-    final timeEditingController = TextEditingController(
-      text: dbItem.time,
-    );
-    final locationEditingController = TextEditingController(
-      text: dbItem.location,
-    );
-    
     return AlertDialog(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             onPressed: () {
-              Navigator.pop(context, dbItem);
+              Navigator.pop(context, widget.dbItem);
             },
             icon: const Icon(Icons.close),
             tooltip: "Close the editing window",
           ),
-          Text("Edit Event ${dbItem.id}"),
+          Text("Edit Event ${widget.dbItem.id}"),
           Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextButton(
-                // TODO this button should be red
                 onPressed: () {
-                  Navigator.pop(context, null);
+                  Navigator.pop(
+                    context,
+                    widget.isDeleted ? widget.dbItem : null
+                  );
                 }, 
-                child: const Text("Delete"),
+                child: Text(widget.isDeleted ? "Undelete" : "Delete"),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context, DatabaseItem(
-                    id: dbItem.id,
+                    id: widget.dbItem.id,
                     title: titleEditingController.text,
                     desc: descriptionEditingController.text,
-                    type: dbItem.type,
-                    contactName: dbItem.contactName,
-                    contactEmail: dbItem.contactEmail,
-                    beginPosting: dbItem.beginPosting,
-                    endPosting: dbItem.endPosting,
-                    date: dbItem.date,
+                    type: widget.dbItem.type,
+                    contactName: widget.dbItem.contactName,
+                    contactEmail: widget.dbItem.contactEmail,
+                    beginPosting: widget.dbItem.beginPosting,
+                    endPosting: widget.dbItem.endPosting,
+                    date: widget.dbItem.date,
                     time: timeEditingController.text,
                     location: locationEditingController.text,
-                    applyDeadline: dbItem.applyDeadline,
+                    applyDeadline: widget.dbItem.applyDeadline,
                   ));
                 },
                 child: const Text("Update"),
@@ -80,7 +111,7 @@ class DatabaseEditDialog extends StatelessWidget {
             DatabaseItem.fieldCount,
             (fieldIndex) {
               final fieldTitle = DatabaseItem.fieldTitles[fieldIndex];
-              final fieldContents = dbItem.fieldContents[fieldIndex];
+              final fieldContents = widget.dbItem.fieldContents[fieldIndex];
               return DataRow(
                 cells: [
                   DataCell(
@@ -89,10 +120,14 @@ class DatabaseEditDialog extends StatelessWidget {
                   DataCell(
                     // Text(fieldContents?.toString() ?? ""),
                     switch (fieldContents) {
-                      String stringContents => TextField(
-                        controller: TextEditingController(
-                          text: stringContents,
-                        ),
+                      String? _ => TextField(
+                        controller: switch (fieldTitle) {
+                          "Title" => titleEditingController,
+                          "Description" => descriptionEditingController,
+                          "Time (optional)" => timeEditingController,
+                          "Location (optional)" => locationEditingController,
+                          _ => null,
+                        },
                       ),
                       _ => Text(fieldContents?.toString() ?? "<empty field>"),
                     },
