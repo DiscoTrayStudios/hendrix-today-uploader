@@ -123,6 +123,11 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
     }
     _displayUpdateResults(changeResults);
     _getFirestoreContents();
+    if (mounted) {
+      setState(() {
+        _dbUpdateInProgress = false;
+      });
+    }
   }
 
   /// Displays [SnackBar] messages for each [UploadResultType] in [results].
@@ -134,8 +139,8 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
         .any((result) => result.type == UploadResultType.permissionDenied)) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text(
-            'You do not have delete permission. Please sign in or contact the '
-            'maintainer of this upload tool.'),
+            "You do not have permission to update the database. Please sign in "
+            "or contact the maintainer of this upload tool."),
         backgroundColor: Theme.of(context).colorScheme.error,
       ));
       return;
@@ -143,13 +148,11 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
     final invalidFields = results
         .where((result) => result.type == UploadResultType.invalidFields);
     if (invalidFields.isNotEmpty) {
-      String displayIDs = invalidFields
-          .map((result) => result.dbItem.id)
-          .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-            'The following rows (by ID) are improperly formatted or missing '
-            'required data: $displayIDs'),
+        content: const Text(
+            "Some of the items are improperly formatted or missing required "
+            "data, so they cannot be updated. Please ensure you have not made "
+            "any erroneous edits."),
         backgroundColor: Theme.of(context).colorScheme.error,
       ));
     }
@@ -161,8 +164,8 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
-            'The following rows (by ID) could not be deleted because their IDs '
-            'are not present in the database: $displayIDs'),
+            "The following items (by ID) could not be updated because their "
+            "IDs are not present in the database: $displayIDs"),
         backgroundColor: Theme.of(context).colorScheme.error,
       ));
     }
@@ -174,8 +177,8 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
-            'An unknown error occurred trying to delete the following rows (by '
-            'ID): $displayIDs'),
+            "An unknown error occurred trying to update the following items "
+            "(by ID): $displayIDs"),
         backgroundColor: Theme.of(context).colorScheme.error,
       ));
     }
