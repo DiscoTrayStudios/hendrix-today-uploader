@@ -24,7 +24,7 @@ DatabaseItem? _translateDocSnapshot(Map<String, dynamic> snapshot) {
   U? then<T, U>(T? first, U? Function(T) next) => switch (first) {
       null => null,
       T t => next(t),
-    };
+  };
   return then(
     snapshot["id"]?.toString(),
     (String idString) => then(
@@ -40,18 +40,12 @@ DatabaseItem? _translateDocSnapshot(Map<String, dynamic> snapshot) {
               (String contactName) => then(
                 snapshot["contactEmail"]?.toString(),
                 (String contactEmail) => then(
-                  _formatDateTime(snapshot["beginPosting"]),
+                  formatDateTime(snapshot["beginPosting"]),
                   (DateTime beginPosting) => then(
-                    _formatDateTime(snapshot["endPosting"]),
+                    formatDateTime(snapshot["endPosting"]),
                     (DateTime endPosting) => then(
-                      _formatDateTime(snapshot["date"]),
-                      (DateTime date) {
-                        final time = snapshot["time"]?.toString();
-                        final location = snapshot["location"]?.toString();
-                        final applyDeadline = _formatDateTime(
-                          snapshot["applyDeadline"],
-                        );
-                        return DatabaseItem(
+                      formatDateTime(snapshot["date"]),
+                      (DateTime date) => DatabaseItem(
                           id: id,
                           title: title,
                           desc: desc,
@@ -61,11 +55,12 @@ DatabaseItem? _translateDocSnapshot(Map<String, dynamic> snapshot) {
                           beginPosting: beginPosting,
                           endPosting: endPosting,
                           date: date,
-                          time: time,
-                          location: location,
-                          applyDeadline: applyDeadline,
-                        );
-                      },
+                          time: snapshot["time"]?.toString(),
+                          location: snapshot["location"]?.toString(),
+                          applyDeadline: formatDateTime(
+                            snapshot["applyDeadline"],
+                          ),
+                      ),
                     ),
                   ),
                 ),
@@ -78,7 +73,7 @@ DatabaseItem? _translateDocSnapshot(Map<String, dynamic> snapshot) {
   );
 }
 
-DateTime? _formatDateTime(dynamic dyn) => switch (dyn) {
+DateTime? formatDateTime(dynamic dyn) => switch (dyn) {
     Timestamp timestamp => timestamp.toDate(),
     _ => null,
   };

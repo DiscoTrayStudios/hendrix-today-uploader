@@ -23,8 +23,21 @@ class UploadResult {
       UploadResult(UploadResultType.successfulDelete, dbItem);
   factory UploadResult.permissionDenied(DatabaseItem dbItem) =>
       UploadResult(UploadResultType.permissionDenied, dbItem);
-  factory UploadResult.invalidFields(DatabaseItem dbItem) =>
-      UploadResult(UploadResultType.invalidFields, dbItem);
+  factory UploadResult.invalidFields() =>
+      UploadResult(UploadResultType.invalidFields, DatabaseItem(
+        id: 0,
+        title: "",
+        desc: "",
+        type: DatabaseItemType.event,
+        contactName: "",
+        contactEmail: "",
+        beginPosting: DateTime.fromMillisecondsSinceEpoch(0),
+        endPosting: DateTime.fromMillisecondsSinceEpoch(0),
+        date: DateTime.fromMillisecondsSinceEpoch(0),
+        time: null,
+        location: null,
+        applyDeadline: null,
+      ));
   factory UploadResult.idNotPresent(DatabaseItem dbItem) =>
       UploadResult(UploadResultType.idNotPresent, dbItem);
   factory UploadResult.unknownError(DatabaseItem dbItem) =>
