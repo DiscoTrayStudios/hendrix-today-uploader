@@ -99,6 +99,7 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
       ),
       content: SingleChildScrollView(
         child: DataTable(
+          dataRowMaxHeight: double.infinity,
           columns: const [
             DataColumn(
               label: Text("Field"),
@@ -128,6 +129,7 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
                           "Location (optional)" => locationEditingController,
                           _ => null,
                         },
+                        maxLines: null,
                       ),
                       _ => Text(fieldContents?.toString() ?? "<empty field>"),
                     },
