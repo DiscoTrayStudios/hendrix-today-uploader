@@ -21,7 +21,8 @@ class ExcelTable extends StatelessWidget {
                 .map((field) => Center(
                       child: TableItem(
                         cellValue:
-                            '${field.name} (${ExcelData.columnLetter(field.index)})',
+                            "${field.name} "
+                            "(${ExcelData.columnLetter(field.column)})",
                       ),
                     ))
                 .toList(),
