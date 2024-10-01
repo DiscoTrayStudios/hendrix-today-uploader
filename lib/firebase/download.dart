@@ -20,60 +20,68 @@ Future<List<DatabaseItem>> getFirestoreContents() async {
 }
 
 DatabaseItem? _translateDocSnapshot(Map<String, dynamic> snapshot) {
-  // monadic bind for nullable types; allows for short-cirtuiting
-  U? then<T, U>(T? first, U? Function(T) next) => switch (first) {
-      null => null,
-      T t => next(t),
-  };
-  return then(
-    snapshot["id"]?.toString(),
-    (String idString) => then(
-      int.tryParse(idString),
-      (int id) => then(
-        snapshot["title"]?.toString(),
-        (String title) => then(
-          snapshot["desc"]?.toString(),
-          (String desc) => then(
-            DatabaseItemType.fromString(snapshot["type"]?.toString()),
-            (DatabaseItemType type) => then(
-              snapshot["contactName"]?.toString(),
-              (String contactName) => then(
-                snapshot["contactEmail"]?.toString(),
-                (String contactEmail) => then(
-                  formatDateTime(snapshot["beginPosting"]),
-                  (DateTime beginPosting) => then(
-                    formatDateTime(snapshot["endPosting"]),
-                    (DateTime endPosting) => then(
-                      formatDateTime(snapshot["date"]),
-                      (DateTime date) => DatabaseItem(
-                          id: id,
-                          title: title,
-                          desc: desc,
-                          type: type,
-                          contactName: contactName,
-                          contactEmail: contactEmail,
-                          beginPosting: beginPosting,
-                          endPosting: endPosting,
-                          date: date,
-                          time: snapshot["time"]?.toString(),
-                          location: snapshot["location"]?.toString(),
-                          applyDeadline: formatDateTime(
-                            snapshot["applyDeadline"],
-                          ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-DateTime? formatDateTime(dynamic dyn) => switch (dyn) {
-    Timestamp timestamp => timestamp.toDate(),
+  DateTime? formatDateTime(dynamic dyn) => switch (dyn) {
+    Timestamp ts => ts.toDate(),
     _ => null,
   };
+
+  final String? idString = snapshot["id"]?.toString();
+  if (idString == null) {
+    return null;
+  }
+  final int? id = int.tryParse(idString);
+  if (id == null) {
+    return null;
+  }
+  final String? title = snapshot["title"]?.toString();
+  if (title == null) {
+    return null;
+  }
+  final String? desc = snapshot["desc"]?.toString();
+  if (desc == null) {
+    return null;
+  }
+  final DatabaseItemType? type = DatabaseItemType.fromString(
+    snapshot["type"]?.toString(),
+  );
+  if (type == null) {
+    return null;
+  }
+  final String? contactName = snapshot["contactName"]?.toString();
+  if (contactName == null) {
+    return null;
+  }
+  final String? contactEmail = snapshot["contactEmail"]?.toString();
+  if (contactEmail == null) {
+    return null;
+  }
+  final DateTime? beginPosting = formatDateTime(snapshot["beginPosting"]);
+  if (beginPosting == null) {
+    return null;
+  }
+  final DateTime? endPosting = formatDateTime(snapshot["endPosting"]);
+  if (endPosting == null) {
+    return null;
+  }
+  final DateTime? date = formatDateTime(snapshot["date"]);
+  if (date == null) {
+    return null;
+  }
+  final String? time = snapshot["time"]?.toString();
+  final String? location = snapshot["location"]?.toString();
+  final DateTime? applyDeadline = formatDateTime(snapshot["applyDeadline"]);
+  return DatabaseItem(
+    id: id,
+    title: title,
+    desc: desc,
+    type: type,
+    contactName: contactName,
+    contactEmail: contactEmail,
+    beginPosting: beginPosting,
+    endPosting: endPosting,
+    date: date,
+    time: time,
+    location: location,
+    applyDeadline: applyDeadline,
+  );
+}

@@ -2,8 +2,6 @@ import 'package:excel/excel.dart';
 
 import 'package:hendrix_today_uploader/firebase/constants.dart';
 import 'package:hendrix_today_uploader/firebase/database_item.dart';
-import 'package:hendrix_today_uploader/firebase/download.dart'
-    show formatDateTime;
 
 typedef ExcelRow = List<String?>;
 
@@ -18,56 +16,73 @@ extension Format on ExcelRow {
 
 extension AsDatabaseItem on ExcelRow {
   DatabaseItem? asDatabaseItem() {
-    // monadic bind for nullable types; allows for short-cirtuiting
-    U? then<T, U>(T? first, U? Function(T) next) => switch (first) {
-        null => null,
-        T t => next(t),
+    DateTime? formatDateTime(String? from) => switch (from) {
+      null => null,
+      String s => DateTime.tryParse(s),
     };
-    return then(
-      get(idField.column),
-      (String idString) => then(
-        int.tryParse(idString),
-        (int id) => then(
-          get(titleField.column),
-          (String title) => then(
-            get(descField.column),
-            (String desc) => then(
-              DatabaseItemType.fromString(get(typeField.column)),
-              (DatabaseItemType type) => then(
-                get(contactNameField.column),
-                (String contactName) => then(
-                  get(contactEmailField.column),
-                  (String contactEmail) => then(
-                    formatDateTime(get(beginPostingField.column)),
-                    (DateTime beginPosting) => then(
-                      formatDateTime(get(endPostingField.column)),
-                      (DateTime endPosting) => then(
-                        formatDateTime(get(dateField.column)),
-                        (DateTime date) => DatabaseItem(
-                            id: id,
-                            title: title,
-                            desc: desc,
-                            type: type,
-                            contactName: contactName,
-                            contactEmail: contactEmail,
-                            beginPosting: beginPosting,
-                            endPosting: endPosting,
-                            date: date,
-                            time: get(timeField.column),
-                            location: get(locationField.column),
-                            applyDeadline: formatDateTime(
-                              get(applyDeadlineField.column),
-                            ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    
+    final String? idString = get(idField.column);
+    if (idString == null) {
+      return null;
+    }
+    final int? id = int.tryParse(idString);
+    if (id == null) {
+      return null;
+    }
+    final String? title = get(titleField.column);
+    if (title == null) {
+      return null;
+    }
+    final String? desc = get(descField.column);
+    if (desc == null) {
+      return null;
+    }
+    final DatabaseItemType? type = DatabaseItemType.fromString(
+      get(typeField.column),
+    );
+    if (type == null) {
+      return null;
+    }
+    final String? contactName = get(contactNameField.column);
+    if (contactName == null) {
+      return null;
+    }
+    final String? contactEmail = get(contactEmailField.column);
+    if (contactEmail == null) {
+      return null;
+    }
+    final DateTime? beginPosting = formatDateTime(
+      get(beginPostingField.column),
+    );
+    if (beginPosting == null) {
+      return null;
+    }
+    final DateTime? endPosting = formatDateTime(get(endPostingField.column));
+    if (endPosting == null) {
+      return null;
+    }
+    final DateTime? date = formatDateTime(get(dateField.column));
+    if (date == null) {
+      return null;
+    }
+    final String? time = get(timeField.column);
+    final String? location = get(locationField.column);
+    final DateTime? applyDeadline = formatDateTime(
+      get(applyDeadlineField.column),
+    );
+    return DatabaseItem(
+      id: id,
+      title: title,
+      desc: desc,
+      type: type,
+      contactName: contactName,
+      contactEmail: contactEmail,
+      beginPosting: beginPosting,
+      endPosting: endPosting,
+      date: date,
+      time: time,
+      location: location,
+      applyDeadline: applyDeadline
     );
   }
 }

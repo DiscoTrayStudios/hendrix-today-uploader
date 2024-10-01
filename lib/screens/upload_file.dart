@@ -49,9 +49,11 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
         .where((result) => result.type == UploadResultType.invalidFields);
     if (invalidFields.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: const Text(
-            "Some of the Excel rows are improperly formatted or missing "
-            "required data. Please ensure they are formatted correctly."),
+        content: Text(
+            "${invalidFields.length} Excel row"
+            "${invalidFields.length != 1 ? "s are" : " is"} improperly "
+            "formatted or missing required data. Please ensure they are "
+            "formatted correctly."),
         backgroundColor: Theme.of(context).colorScheme.error,
       ));
     }
