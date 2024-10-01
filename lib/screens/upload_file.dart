@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:hendrix_today_uploader/firebase/constants.dart';
+import 'package:hendrix_today_uploader/firebase/database_item.dart';
 import 'package:hendrix_today_uploader/firebase/upload.dart';
+import 'package:hendrix_today_uploader/firebase/upload_result.dart';
 import 'package:hendrix_today_uploader/objects/excel_data.dart';
 import 'package:hendrix_today_uploader/widgets/excel_table.dart';
 
@@ -26,7 +27,10 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
       _uploadLoading = true;
     });
     for (final row in widget.excel.rows) {
-      final result = await uploadToFirestore(row);
+      final result = switch (row.asDatabaseItem()) {
+        null => UploadResult.invalidFields(),
+        DatabaseItem translatedItem => await uploadToFirestore(translatedItem),
+      };
       results.add(result);
       if (result.type == UploadResultType.permissionDenied) break;
     }
@@ -44,13 +48,10 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
     final invalidFields = results
         .where((result) => result.type == UploadResultType.invalidFields);
     if (invalidFields.isNotEmpty) {
-      String displayIDs = invalidFields
-          .map((result) => result.snapshot.get(idField.index) ?? '[missing ID]')
-          .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-            'The following rows (by ID) are improperly formatted or missing '
-            'required data: $displayIDs'),
+        content: const Text(
+            "Some of the Excel rows are improperly formatted or missing "
+            "required data. Please ensure they are formatted correctly."),
         backgroundColor: Theme.of(context).colorScheme.error,
       ));
     }
@@ -58,7 +59,7 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
         results.where((result) => result.type == UploadResultType.unknownError);
     if (unknownErrors.isNotEmpty) {
       String displayIDs = unknownErrors
-          .map((result) => result.snapshot.get(idField.index))
+          .map((result) => result.dbItem.id)
           .join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
