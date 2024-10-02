@@ -16,11 +16,17 @@ extension Format on ExcelRow {
 
 extension AsDatabaseItem on ExcelRow {
   DatabaseItem? asDatabaseItem() {
-    DateTime? formatDateTime(String? from) => switch (from) {
+    /// Parses a [DateTime] from a [String] representation, truncating the
+    /// result to day-resolution and using the local time zone
+    /// ([DateTime.tryParse] uses UTC mode by default).
+    DateTime? parseDateTime(String? from) => switch (from) {
       null => null,
-      String s => DateTime.tryParse(s),
+      String s => switch (DateTime.tryParse(s)) {
+        null => null,
+        DateTime dt => DateTime (dt.year, dt.month, dt.day),
+      },
     };
-    
+
     final String? idString = get(idField.column);
     if (idString == null) {
       return null;
@@ -51,23 +57,21 @@ extension AsDatabaseItem on ExcelRow {
     if (contactEmail == null) {
       return null;
     }
-    final DateTime? beginPosting = formatDateTime(
-      get(beginPostingField.column),
-    );
+    final DateTime? beginPosting = parseDateTime(get(beginPostingField.column));
     if (beginPosting == null) {
       return null;
     }
-    final DateTime? endPosting = formatDateTime(get(endPostingField.column));
+    final DateTime? endPosting = parseDateTime(get(endPostingField.column));
     if (endPosting == null) {
       return null;
     }
-    final DateTime? date = formatDateTime(get(dateField.column));
+    final DateTime? date = parseDateTime(get(dateField.column));
     if (date == null) {
       return null;
     }
     final String? time = get(timeField.column);
     final String? location = get(locationField.column);
-    final DateTime? applyDeadline = formatDateTime(
+    final DateTime? applyDeadline = parseDateTime(
       get(applyDeadlineField.column),
     );
     return DatabaseItem(
@@ -82,7 +86,7 @@ extension AsDatabaseItem on ExcelRow {
       date: date,
       time: time,
       location: location,
-      applyDeadline: applyDeadline
+      applyDeadline: applyDeadline,
     );
   }
 }
