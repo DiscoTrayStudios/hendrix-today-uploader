@@ -288,6 +288,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                             onTap: () async {
                               await showDialog<DatabaseItem?>(
                                 context: context,
+                                barrierDismissible: false,
                                 builder: (context) => DatabaseEditDialog(
                                   dbItem: rowItem,
                                   isDeleted: _markedForDeletion(rowItem),
