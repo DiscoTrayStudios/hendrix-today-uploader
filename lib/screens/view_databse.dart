@@ -4,6 +4,7 @@ import 'package:hendrix_today_uploader/firebase/database_item.dart';
 import 'package:hendrix_today_uploader/firebase/download.dart';
 import 'package:hendrix_today_uploader/firebase/upload.dart';
 import 'package:hendrix_today_uploader/firebase/upload_result.dart';
+import 'package:hendrix_today_uploader/widgets/confirm_upload.dart';
 import 'package:hendrix_today_uploader/widgets/edit_dialog.dart';
 import 'package:hendrix_today_uploader/widgets/table_scroller.dart';
 
@@ -101,6 +102,16 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
 
   void _applyChanges() async {
     if (_dbUpdateInProgress) {
+      return;
+    }
+    final confirmChoice = await showDialog<bool>(
+      context: context,
+      builder: (context) => ConfirmUploadDialog(
+        editCount: _itemsToEdit.length,
+        deleteCount: _itemsToDelete.length,
+      ),
+    );
+    if (confirmChoice != true) {
       return;
     }
     if (mounted) {
