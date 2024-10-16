@@ -212,6 +212,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO add info text about number of items marked to edit/delete
     return Scaffold(
       appBar: AppBar(
         title: const Text("View Database"),

@@ -138,6 +138,7 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
             ),
           ],
           rows: <(String, Widget)>[
+            // all fields written individually, maybe refactor someday?
               ("Title", TextField(
                 controller: titleEditingController,
                 maxLines: null,
@@ -218,6 +219,7 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
                   Text(editingDate.toString()),
                 ],
               )),
+              // TODO add trash can buttons to clear optional fields
               ("Time (optional)", TextField(
                 controller: timeEditingController,
                 maxLines: null,
@@ -253,126 +255,6 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
               ],
             );
           }).toList(),
-          // rows: List.generate(
-          //   DatabaseItem.fieldCount,
-          //   (fieldIndex) {
-          //     final fieldTitle = DatabaseItem.fieldTitles[fieldIndex];
-          //     final fieldType = DatabaseItem.fieldTypes[fieldIndex];
-          //     final fieldContents = widget.dbItem.fieldContents[fieldIndex];
-          //     return DataRow(
-          //       cells: [
-          //         DataCell(
-          //           Text(fieldTitle),
-          //         ),
-          //         DataCell(
-          //           switch (fieldType) {
-          //             const (String) => TextField(
-          //               controller: switch (fieldTitle) {
-          //                 "Title" => titleEditingController,
-          //                 "Description" => descriptionEditingController,
-          //                 "Time (optional)" => timeEditingController,
-          //                 "Location (optional)" => locationEditingController,
-          //                 _ => null,
-          //               },
-          //               maxLines: null,
-          //             ),
-          //             const (DateTime) => switch (fieldTitle) {
-          //               "First day to post" => Row(
-          //                 children: [
-          //                   IconButton(
-          //                     icon: const Icon(Icons.edit_calendar),
-          //                     onPressed: () async => await _updateDate(
-          //                       context,
-          //                       editingBeginPosting
-          //                     ).then((newDate) => setState(() {
-          //                       editingBeginPosting = newDate
-          //                           ?? editingBeginPosting;
-          //                     })),
-          //                   ),
-          //                   Text(editingBeginPosting.toString()),
-          //                 ],
-          //               ),
-          //               "Last day to post" => Row(
-          //                 children: [
-          //                   IconButton(
-          //                     icon: const Icon(Icons.edit_calendar),
-          //                     onPressed: () async => await _updateDate(
-          //                       context,
-          //                       editingEndPosting,
-          //                     ).then((newDate) => setState(() {
-          //                       editingEndPosting = newDate
-          //                           ?? editingEndPosting;
-          //                     })),
-          //                   ),
-          //                   Text(editingEndPosting.toString()),
-          //                 ],
-          //               ),
-          //               "Date" => Row(
-          //                 children: [
-          //                   IconButton(
-          //                     icon: const Icon(Icons.edit_calendar),
-          //                     onPressed: () async => await _updateDate(
-          //                       context,
-          //                       editingDate,
-          //                     ).then((newDate) => setState(() {
-          //                       editingDate = newDate
-          //                           ?? editingDate;
-          //                     })),
-          //                   ),
-          //                   Text(editingDate.toString()),
-          //                 ],
-          //               ),
-          //               "Application deadline (optional)" => Row(
-          //                 children: [
-          //                   IconButton(
-          //                     icon: const Icon(Icons.edit_calendar),
-          //                     onPressed: () async => await _updateDate(
-          //                       context,
-          //                       editingApplyDeadline
-          //                     ).then((newDate) => setState(() {
-          //                       editingApplyDeadline = newDate;
-          //                     })),
-          //                   ),
-          //                   Text(editingApplyDeadline?.toString() ?? "<empty field>"),
-          //                 ],
-          //               ),
-          //               _ => Text(fieldContents?.toString() ?? "<empty field>"), // unreachable case
-          //             },
-          //             const (DatabaseItemType) => Text(fieldContents.toString()),
-          //             _ => Text(fieldContents?.toString() ?? "<empty field>"),
-          //           }
-          //           // switch (fieldType) {
-          //           //   const (String) => TextField(
-          //           //     controller: switch (fieldTitle) {
-          //           //       "Title" => titleEditingController,
-          //           //       "Description" => descriptionEditingController,
-          //           //       "Time (optional)" => timeEditingController,
-          //           //       "Location (optional)" => locationEditingController,
-          //           //       _ => null,
-          //           //     },
-          //           //     maxLines: null,
-          //           //   ),
-          //           //   const (DateTime) => Row(
-          //           //     children: [
-          //           //       IconButton(
-          //           //         icon: const Icon(Icons.edit_calendar),
-          //           //         onPressed: () async => _updateDate(
-          //           //           context,
-          //           //           selectedDate,
-          //           //         ).then((newDate) => setState(() {
-          //           //           selectedDate = newDate ?? selectedDate;
-          //           //         })),
-          //           //       ),
-          //           //       Text(selectedDate.toString()),
-          //           //     ],
-          //           //   ),
-          //           //   _ => Text(fieldContents?.toString() ?? "<empty field>"),
-          //           // },
-          //         ),
-          //       ],
-          //     );
-          //   },
-          // ),
         ),
       ),
     );
