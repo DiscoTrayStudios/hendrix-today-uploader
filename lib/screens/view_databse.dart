@@ -212,6 +212,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO add info text about number of items marked to edit/delete
     return Scaffold(
       appBar: AppBar(
         title: const Text("View Database"),
@@ -288,6 +289,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                             onTap: () async {
                               await showDialog<DatabaseItem?>(
                                 context: context,
+                                barrierDismissible: false,
                                 builder: (context) => DatabaseEditDialog(
                                   dbItem: rowItem,
                                   isDeleted: _markedForDeletion(rowItem),
