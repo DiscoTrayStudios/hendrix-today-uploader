@@ -67,8 +67,6 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
     super.dispose();
   }
 
-  String? _nullifyEmptyString(String s) => s.isEmpty ? null : s;
-
   DatabaseItem get _newItem => DatabaseItem(
       id: widget.dbItem.id,
       title: titleEditingController.text,
@@ -79,8 +77,8 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
       beginPosting: editingBeginPosting,
       endPosting: editingEndPosting,
       date: editingDate,
-      time: _nullifyEmptyString(timeEditingController.text),
-      location: _nullifyEmptyString(locationEditingController.text),
+      time: timeEditingController.text,
+      location: locationEditingController.text,
       applyDeadline: editingApplyDeadline,
     );
 
