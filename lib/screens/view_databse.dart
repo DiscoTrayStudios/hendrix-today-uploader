@@ -87,6 +87,25 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
     }
   }
 
+  TextStyle get _normalStyle => TextStyle();
+  TextStyle get _editStyle => TextStyle(
+    fontWeight: FontWeight.bold,
+  );
+  TextStyle get _deleteStyle => TextStyle(
+    color: Theme.of(context).colorScheme.error,
+    fontWeight: FontWeight.bold,
+  );
+
+  TextStyle _tableStyleFor(DatabaseItem dbItem) {
+    if (_markedForDeletion(dbItem)) {
+      return _deleteStyle;
+    }
+    if (_markedForEdit(dbItem)) {
+      return _editStyle;
+    }
+    return _normalStyle;
+  }
+
   /// Checks to see if there is a [DatabaseItem] with the same ID as [dbItem]
   /// that has been edited this session. If so, the newer version is returned;
   /// otherwise, the original item is returned.
@@ -240,7 +259,22 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                 padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
                 child: Row(
                   children: [
-                    Text('There are ${_retrievedItems!.length} items in the database.'),
+                    Text(
+                      "There are ${_retrievedItems!.length} items "
+                      "in the database.",
+                    ),
+                    Text(
+                      "${_itemsToEdit.length} "
+                      "${_itemsToEdit.length == 1 ? "is" : "are"} "
+                      "being edited.",
+                      style: _editStyle,
+                    ),
+                    Text(
+                      "${_itemsToDelete.length} "
+                      "${_itemsToDelete.length == 1 ? "is" : "are"} "
+                      "marked for deletion.",
+                      style: _deleteStyle,
+                    ),
                     const Spacer(),
                     ElevatedButton(
                       onPressed: _markOldEventsToDelete,
@@ -254,7 +288,13 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                           ? const Text("Upload in progress...")
                           : const Text("Apply changes"),
                     ),
-                  ],
+                  ].map((e) => e is Spacer
+                    ? e
+                    : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: e
+                    ),
+                  ).toList(),
                 ),
               ),
             if (_retrievedItems == null)
@@ -285,15 +325,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                                   DateTime dt => DatabaseItem.formatDate(dt),
                                   dynamic otherType => otherType.toString(),
                                 },
-                                style: TextStyle(
-                                  color: _markedForDeletion(rowItem)
-                                    ? Theme.of(context).colorScheme.error
-                                    : null,
-                                  fontWeight: _markedForEdit(rowItem)
-                                          || _markedForDeletion(rowItem)
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                ),
+                                style: _tableStyleFor(rowItem),
                                 overflow: TextOverflow.fade,
                               ),
                             ),
