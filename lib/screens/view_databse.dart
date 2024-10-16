@@ -4,6 +4,7 @@ import 'package:hendrix_today_uploader/firebase/database_item.dart';
 import 'package:hendrix_today_uploader/firebase/download.dart';
 import 'package:hendrix_today_uploader/firebase/upload.dart';
 import 'package:hendrix_today_uploader/firebase/upload_result.dart';
+import 'package:hendrix_today_uploader/widgets/confirm_leave.dart';
 import 'package:hendrix_today_uploader/widgets/confirm_upload.dart';
 import 'package:hendrix_today_uploader/widgets/edit_dialog.dart';
 import 'package:hendrix_today_uploader/widgets/table_scroller.dart';
@@ -242,115 +243,127 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO add info text about number of items marked to edit/delete
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("View Database"),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_retrievedItems != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
-                child: Row(
-                  children: [
-                    Text(
-                      "There are ${_retrievedItems!.length} items "
-                      "in the database.",
-                    ),
-                    Text(
-                      "${_itemsToEdit.length} "
-                      "${_itemsToEdit.length == 1 ? "is" : "are"} "
-                      "being edited.",
-                      style: _editStyle,
-                    ),
-                    Text(
-                      "${_itemsToDelete.length} "
-                      "${_itemsToDelete.length == 1 ? "is" : "are"} "
-                      "marked for deletion.",
-                      style: _deleteStyle,
-                    ),
-                    const Spacer(),
-                    ElevatedButton(
-                      onPressed: _markOldEventsToDelete,
-                      child: _dbUpdateInProgress
-                          ? const Text('Upload in progress...')
-                          : const Text('Delete all old events'),
-                    ),
-                    ElevatedButton(
-                      onPressed: _applyChanges,
-                      child: _dbUpdateInProgress
-                          ? const Text("Upload in progress...")
-                          : const Text("Apply changes"),
-                    ),
-                  ].map((e) => e is Spacer
-                    ? e
-                    : Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: e
-                    ),
-                  ).toList(),
+    // TODO WillPopScope is deprecated, fix this
+    return WillPopScope(
+      onWillPop: () async {
+        if (_itemsToEdit.length + _itemsToDelete.length == 0) {
+          return true;
+        }
+        final confirmChoice = await showDialog<bool>(
+          context: context,
+          builder: (context) => ConfirmLeaveDialog(),
+        );
+        return confirmChoice == true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("View Database"),
+          centerTitle: true,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_retrievedItems != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 10),
+                  child: Row(
+                    children: [
+                      Text(
+                        "There are ${_retrievedItems!.length} items "
+                        "in the database.",
+                      ),
+                      Text(
+                        "${_itemsToEdit.length} "
+                        "${_itemsToEdit.length == 1 ? "is" : "are"} "
+                        "being edited.",
+                        style: _editStyle,
+                      ),
+                      Text(
+                        "${_itemsToDelete.length} "
+                        "${_itemsToDelete.length == 1 ? "is" : "are"} "
+                        "marked for deletion.",
+                        style: _deleteStyle,
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: _markOldEventsToDelete,
+                        child: _dbUpdateInProgress
+                            ? const Text('Upload in progress...')
+                            : const Text('Delete all old events'),
+                      ),
+                      ElevatedButton(
+                        onPressed: _applyChanges,
+                        child: _dbUpdateInProgress
+                            ? const Text("Upload in progress...")
+                            : const Text("Apply changes"),
+                      ),
+                    ].map((e) => e is Spacer
+                      ? e
+                      : Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: e
+                      ),
+                    ).toList(),
+                  ),
                 ),
-              ),
-            if (_retrievedItems == null)
-              const Center(child: Text('Loading...'))
-            else
-              TableScroller(
-                child: DataTable(
-                  columns: DatabaseItem.fieldTitles
-                    .map((title) => DataColumn(
-                      label: Text(title),
-                    ))
-                    .toList(),
-                  rows: _retrievedItems!
-                    .map((originalRowItem) {
-                      final rowItem = _latestVersion(originalRowItem);
-                      return DataRow(
-                        cells: rowItem
-                          .fieldContents
-                          .map((dynamic cellData) => DataCell(
-                            Container(
-                              constraints: const BoxConstraints(
-                                maxWidth: 300,
-                                maxHeight: 40,
-                              ),
-                              child: Text(
-                                switch (cellData) {
-                                  null => "",
-                                  DateTime dt => DatabaseItem.formatDate(dt),
-                                  dynamic otherType => otherType.toString(),
-                                },
-                                style: _tableStyleFor(rowItem),
-                                overflow: TextOverflow.fade,
-                              ),
-                            ),
-                            onTap: () async {
-                              await showDialog<DatabaseItem?>(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) => DatabaseEditDialog(
-                                  dbItem: rowItem,
-                                  isDeleted: _markedForDeletion(rowItem),
+              if (_retrievedItems == null)
+                const Center(child: Text('Loading...'))
+              else
+                TableScroller(
+                  child: DataTable(
+                    columns: DatabaseItem.fieldTitles
+                      .map((title) => DataColumn(
+                        label: Text(title),
+                      ))
+                      .toList(),
+                    rows: _retrievedItems!
+                      .map((originalRowItem) {
+                        final rowItem = _latestVersion(originalRowItem);
+                        return DataRow(
+                          cells: rowItem
+                            .fieldContents
+                            .map((dynamic cellData) => DataCell(
+                              Container(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 300,
+                                  maxHeight: 40,
                                 ),
-                              ).then((editedItem) {
-                                setState(() {
-                                  _afterEditing(originalRowItem, editedItem);
+                                child: Text(
+                                  switch (cellData) {
+                                    null => "",
+                                    DateTime dt => DatabaseItem.formatDate(dt),
+                                    dynamic otherType => otherType.toString(),
+                                  },
+                                  style: _tableStyleFor(rowItem),
+                                  overflow: TextOverflow.fade,
+                                ),
+                              ),
+                              onTap: () async {
+                                await showDialog<DatabaseItem?>(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) => DatabaseEditDialog(
+                                    dbItem: rowItem,
+                                    isDeleted: _markedForDeletion(rowItem),
+                                  ),
+                                ).then((editedItem) {
+                                  setState(() {
+                                    _afterEditing(originalRowItem, editedItem);
+                                  });
                                 });
-                              });
-                            },
-                          ))
-                          .toList(),
-                      );
-                    })
-                    .toList(),
+                              },
+                            ))
+                            .toList(),
+                        );
+                      })
+                      .toList(),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
