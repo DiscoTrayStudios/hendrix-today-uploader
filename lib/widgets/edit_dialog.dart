@@ -67,6 +67,8 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
     super.dispose();
   }
 
+  String? _nullifyEmptyString(String s) => s.isEmpty ? null : s;
+
   DatabaseItem get _newItem => DatabaseItem(
       id: widget.dbItem.id,
       title: titleEditingController.text,
@@ -77,8 +79,8 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
       beginPosting: editingBeginPosting,
       endPosting: editingEndPosting,
       date: editingDate,
-      time: timeEditingController.text,
-      location: locationEditingController.text,
+      time: _nullifyEmptyString(timeEditingController.text),
+      location: _nullifyEmptyString(locationEditingController.text),
       applyDeadline: editingApplyDeadline,
     );
 
@@ -182,7 +184,7 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
                       });
                     },
                   ),
-                  Text(editingBeginPosting.toString()),
+                  Text(DatabaseItem.formatDate(editingBeginPosting)),
                 ],
               )),
               ("Last day to post", Row(
@@ -199,7 +201,7 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
                       });
                     }
                   ),
-                  Text(editingEndPosting.toString()),
+                  Text(DatabaseItem.formatDate(editingEndPosting)),
                 ],
               )),
               ("Date", Row(
@@ -216,17 +218,22 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
                       });
                     }
                   ),
-                  Text(editingDate.toString()),
+                  Text(DatabaseItem.formatDate(editingDate)),
                 ],
               )),
-              // TODO add trash can buttons to clear optional fields
               ("Time (optional)", TextField(
                 controller: timeEditingController,
                 maxLines: null,
+                decoration: InputDecoration(
+                  hintText: "No time",
+                ),
               )),
               ("Location (optional)", TextField(
                 controller: locationEditingController,
                 maxLines: null,
+                decoration: InputDecoration(
+                  hintText: "No location",
+                ),
               )),
               ("Application deadline (optional)", Row(
                 children: [
@@ -242,7 +249,20 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
                       });
                     }
                   ),
-                  Text(editingApplyDeadline?.toString() ?? "<empty field>"),
+                  Text(switch (editingApplyDeadline) {
+                    DateTime dt => DatabaseItem.formatDate(dt),
+                    _ => "No deadline",
+                  }),
+                  if (editingApplyDeadline != null)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      tooltip: "Remove the deadline",
+                      onPressed: () {
+                        setState(() {
+                          editingApplyDeadline = null;
+                        });
+                      },
+                    ),
                 ],
               )),
           ].map((tup) {
