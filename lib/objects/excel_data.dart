@@ -20,12 +20,12 @@ extension AsDatabaseItem on ExcelRow {
     /// result to day-resolution and using the local time zone
     /// ([DateTime.tryParse] uses UTC mode by default).
     DateTime? parseDateTime(String? from) => switch (from) {
-      null => null,
-      String s => switch (DateTime.tryParse(s)) {
-        null => null,
-        DateTime dt => DateTime (dt.year, dt.month, dt.day),
-      },
-    };
+          null => null,
+          String s => switch (DateTime.tryParse(s)) {
+              null => null,
+              DateTime dt => DateTime(dt.year, dt.month, dt.day),
+            },
+        };
 
     final String? idString = get(idField.column);
     if (idString == null) {
@@ -87,6 +87,7 @@ extension AsDatabaseItem on ExcelRow {
       time: time,
       location: location,
       applyDeadline: applyDeadline,
+      hip: null,
     );
   }
 }

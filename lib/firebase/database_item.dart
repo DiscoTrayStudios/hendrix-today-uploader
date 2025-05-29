@@ -47,6 +47,7 @@ final class DatabaseItem {
     required this.time,
     required this.location,
     required this.applyDeadline,
+    required this.hip,
   });
   final int id;
   final String title;
@@ -60,6 +61,7 @@ final class DatabaseItem {
   final String? time;
   final String? location;
   final DateTime? applyDeadline;
+  final bool? hip;
 
   /// The number of fields a [DatabaseItem] has.
   static int fieldCount = fieldTitles.length;
@@ -67,84 +69,86 @@ final class DatabaseItem {
   /// Descriptive labels for the fields of a [DatabaseItem]. Please don't change
   /// these.
   static List<String> get fieldTitles => [
-      "ID",
-      "Title",
-      "Description",
-      "Type",
-      "Contact name",
-      "Contact email",
-      "First day to post",
-      "Last day to post",
-      "Date",
-      "Time (optional)",
-      "Location (optional)",
-      "Application deadline (optional)",
-    ];
-  
+        "ID",
+        "HIP",
+        "Title",
+        "Description",
+        "Type",
+        "Contact name",
+        "Contact email",
+        "First day to post",
+        "Last day to post",
+        "Date",
+        "Time (optional)",
+        "Location (optional)",
+        "Application deadline (optional)",
+      ];
+
   /// The types of the fields in a [DatabaseItem] in the same order and with the
   /// same length as [DatabaseItem.fieldTitles].
   static List<Type> get fieldTypes => [
-      int,
-      String,
-      String,
-      DatabaseItemType,
-      String,
-      String,
-      DateTime,
-      DateTime,
-      DateTime,
-      String,
-      String,
-      DateTime,
-    ];
+        int,
+        bool,
+        String,
+        String,
+        DatabaseItemType,
+        String,
+        String,
+        DateTime,
+        DateTime,
+        DateTime,
+        String,
+        String,
+        DateTime,
+      ];
 
-  /// The contents of this [DatabaseItem] in the same order and with the same 
+  /// The contents of this [DatabaseItem] in the same order and with the same
   /// length as [DatabaseItem.fieldTitles].
   List<dynamic> get fieldContents => [
-      id,
-      title,
-      desc,
-      type,
-      contactName,
-      contactEmail,
-      beginPosting,
-      endPosting,
-      date,
-      time,
-      location,
-      applyDeadline,
-    ];
-  
+        id,
+        hip,
+        title,
+        desc,
+        type,
+        contactName,
+        contactEmail,
+        beginPosting,
+        endPosting,
+        date,
+        time,
+        location,
+        applyDeadline,
+      ];
+
   /// Does this [DatabaseItem] have all the same field data as [other]?
   bool equals(DatabaseItem other) =>
-    id == other.id &&
-    title == other.title &&
-    desc == other.desc &&
-    type == other.type &&
-    contactName == other.contactName &&
-    contactEmail == other.contactEmail &&
-    beginPosting == other.beginPosting &&
-    endPosting == other.endPosting &&
-    date == other.date &&
-    time == other.time &&
-    location == other.location &&
-    applyDeadline == other.applyDeadline;
+      id == other.id &&
+      title == other.title &&
+      desc == other.desc &&
+      type == other.type &&
+      contactName == other.contactName &&
+      contactEmail == other.contactEmail &&
+      beginPosting == other.beginPosting &&
+      endPosting == other.endPosting &&
+      date == other.date &&
+      time == other.time &&
+      location == other.location &&
+      applyDeadline == other.applyDeadline;
 
   @override
-  String toString() =>
-    "DatabaseItem("
-    "id=$id, "
-    "title='$title',"
-    "desc='$desc',"
-    "type=$type,"
-    "contactName='$contactName',"
-    "conatactEmail='$contactEmail',"
-    "beginPosting=$beginPosting,"
-    "endPosting=$endPosting,"
-    "date=$date,"
-    "time=${switch (time) { null => "null", String t => "'$t'"}},"
-    "location=${switch (location) { null => "null", String l => "'$l'"}},"
-    "applyDeadline=${applyDeadline ?? "null"})";
+  String toString() => "DatabaseItem("
+      "id=$id, "
+      "title='$title',"
+      "desc='$desc',"
+      "type=$type,"
+      "contactName='$contactName',"
+      "conatactEmail='$contactEmail',"
+      "beginPosting=$beginPosting,"
+      "endPosting=$endPosting,"
+      "date=$date,"
+      "time=${switch (time) { null => "null", String t => "'$t'" }},"
+      "location=${switch (location) { null => "null", String l => "'$l'" }},"
+      "applyDeadline=${applyDeadline ?? "null"})";
 
   /// A compact standardized date format: YYYY-MMM-D, in which MMM is a three-
   /// letter abbreviation of the month's English name, and D is the numeric day

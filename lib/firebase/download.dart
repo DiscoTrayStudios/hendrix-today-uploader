@@ -20,10 +20,11 @@ Future<List<DatabaseItem>> getFirestoreContents() async {
 }
 
 DatabaseItem? _translateDocSnapshot(Map<String, dynamic> snapshot) {
+  T? cast<T>(dynamic x) => (x is T) ? x : null;
   DateTime? formatDateTime(dynamic dyn) => switch (dyn) {
-    Timestamp ts => ts.toDate(),
-    _ => null,
-  };
+        Timestamp ts => ts.toDate(),
+        _ => null,
+      };
 
   final String? idString = snapshot["id"]?.toString();
   if (idString == null) {
@@ -70,6 +71,10 @@ DatabaseItem? _translateDocSnapshot(Map<String, dynamic> snapshot) {
   final String? time = snapshot["time"]?.toString();
   final String? location = snapshot["location"]?.toString();
   final DateTime? applyDeadline = formatDateTime(snapshot["applyDeadline"]);
+
+  final bool? maybeHip = cast(snapshot["hip"]);
+  final bool hip = (maybeHip == null) ? false : maybeHip;
+
   return DatabaseItem(
     id: id,
     title: title,
@@ -83,5 +88,6 @@ DatabaseItem? _translateDocSnapshot(Map<String, dynamic> snapshot) {
     time: time,
     location: location,
     applyDeadline: applyDeadline,
+    hip: hip,
   );
 }

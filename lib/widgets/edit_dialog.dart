@@ -15,7 +15,6 @@ class DatabaseEditDialog extends StatefulWidget {
 }
 
 class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
-
   late final TextEditingController titleEditingController;
   late final TextEditingController descriptionEditingController;
   late final TextEditingController contactNameEditingController;
@@ -27,6 +26,7 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
   late DateTime editingEndPosting;
   late DateTime editingDate;
   late DateTime? editingApplyDeadline;
+  late bool? hip;
 
   @override
   void initState() {
@@ -54,6 +54,7 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
     editingEndPosting = widget.dbItem.endPosting;
     editingDate = widget.dbItem.date;
     editingApplyDeadline = widget.dbItem.applyDeadline;
+    hip = widget.dbItem.hip;
   }
 
   @override
@@ -68,26 +69,29 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
   }
 
   DatabaseItem get _newItem => DatabaseItem(
-      id: widget.dbItem.id,
-      title: titleEditingController.text,
-      desc: descriptionEditingController.text,
-      type: editingType,
-      contactName: contactNameEditingController.text,
-      contactEmail: contactEmailEditingController.text,
-      beginPosting: editingBeginPosting,
-      endPosting: editingEndPosting,
-      date: editingDate,
-      time: timeEditingController.text,
-      location: locationEditingController.text,
-      applyDeadline: editingApplyDeadline,
-    );
+        id: widget.dbItem.id,
+        title: titleEditingController.text,
+        desc: descriptionEditingController.text,
+        type: editingType,
+        contactName: contactNameEditingController.text,
+        contactEmail: contactEmailEditingController.text,
+        beginPosting: editingBeginPosting,
+        endPosting: editingEndPosting,
+        date: editingDate,
+        time: timeEditingController.text,
+        location: locationEditingController.text,
+        applyDeadline: editingApplyDeadline,
+        hip: hip,
+      );
 
-  Future<DateTime?> _updateDate(BuildContext context, DateTime? original) async => await showDatePicker(
-      context: context,
-      firstDate: DateTime(0, 1, 1),
-      lastDate: DateTime(9999, 12, 31),
-      initialDate: original,
-    );
+  Future<DateTime?> _updateDate(
+          BuildContext context, DateTime? original) async =>
+      await showDatePicker(
+        context: context,
+        firstDate: DateTime(0, 1, 1),
+        lastDate: DateTime(9999, 12, 31),
+        initialDate: original,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -110,10 +114,8 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
               TextButton(
                 onPressed: () {
                   Navigator.pop(
-                    context,
-                    widget.isDeleted ? widget.dbItem : null
-                  );
-                }, 
+                      context, widget.isDeleted ? widget.dbItem : null);
+                },
                 child: Text(widget.isDeleted ? "Undelete" : "Delete"),
               ),
               TextButton(
@@ -139,36 +141,52 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
           ],
           rows: <(String, Widget)>[
             // all fields written individually, maybe refactor someday?
-              ("Title", TextField(
+            (
+              "Title",
+              TextField(
                 controller: titleEditingController,
                 maxLines: null,
-              )),
-              ("Description", TextField(
+              )
+            ),
+            (
+              "Description",
+              TextField(
                 controller: descriptionEditingController,
                 maxLines: null,
-              )),
-              ("Type", DropdownButton<DatabaseItemType>(
+              )
+            ),
+            (
+              "Type",
+              DropdownButton<DatabaseItemType>(
                 value: editingType,
                 items: DatabaseItemType.values
                     .map((e) => DropdownMenuItem<DatabaseItemType>(
-                      value: e,
-                      child: Text(e.toString())
-                    )).toList(),
+                        value: e, child: Text(e.toString())))
+                    .toList(),
                 onChanged: (newType) {
                   setState(() {
                     editingType = newType ?? editingType;
                   });
                 },
-              )),
-              ("Contact name", TextField(
+              )
+            ),
+            (
+              "Contact name",
+              TextField(
                 controller: contactNameEditingController,
                 maxLines: null,
-              )),
-              ("Contact email", TextField(
+              )
+            ),
+            (
+              "Contact email",
+              TextField(
                 controller: contactEmailEditingController,
                 maxLines: null,
-              )),
-              ("First day to post", Row(
+              )
+            ),
+            (
+              "First day to post",
+              Row(
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit_calendar),
@@ -184,69 +202,82 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
                   ),
                   Text(DatabaseItem.formatDate(editingBeginPosting)),
                 ],
-              )),
-              ("Last day to post", Row(
+              )
+            ),
+            (
+              "Last day to post",
+              Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.edit_calendar),
-                    onPressed: () async {
-                      final newDate = await _updateDate(
-                        context,
-                        editingEndPosting,
-                      );
-                      setState(() {
-                        editingEndPosting = newDate ?? editingEndPosting;
-                      });
-                    }
-                  ),
+                      icon: const Icon(Icons.edit_calendar),
+                      onPressed: () async {
+                        final newDate = await _updateDate(
+                          context,
+                          editingEndPosting,
+                        );
+                        setState(() {
+                          editingEndPosting = newDate ?? editingEndPosting;
+                        });
+                      }),
                   Text(DatabaseItem.formatDate(editingEndPosting)),
                 ],
-              )),
-              ("Date", Row(
+              )
+            ),
+            (
+              "Date",
+              Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.edit_calendar),
-                    onPressed: () async {
-                      final newDate = await _updateDate(
-                        context,
-                        editingDate,
-                      );
-                      setState(() {
-                        editingDate = newDate ?? editingDate;
-                      });
-                    }
-                  ),
+                      icon: const Icon(Icons.edit_calendar),
+                      onPressed: () async {
+                        final newDate = await _updateDate(
+                          context,
+                          editingDate,
+                        );
+                        setState(() {
+                          editingDate = newDate ?? editingDate;
+                        });
+                      }),
                   Text(DatabaseItem.formatDate(editingDate)),
                 ],
-              )),
-              ("Time (optional)", TextField(
+              )
+            ),
+            (
+              "Time (optional)",
+              TextField(
                 controller: timeEditingController,
                 maxLines: null,
                 decoration: InputDecoration(
                   hintText: "No time",
                 ),
-              )),
-              ("Location (optional)", TextField(
+              )
+            ),
+            (
+              "Location (optional)",
+              TextField(
                 controller: locationEditingController,
                 maxLines: null,
                 decoration: InputDecoration(
                   hintText: "No location",
                 ),
-              )),
-              ("Application deadline (optional)", Row(
+              )
+            ),
+            (
+              "Application deadline (optional)",
+              Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.edit_calendar),
-                    onPressed: () async {
-                      final newDate = await _updateDate(
-                        context,
-                        editingApplyDeadline,
-                      );
-                      setState(() {
-                        editingApplyDeadline = newDate ?? editingApplyDeadline;
-                      });
-                    }
-                  ),
+                      icon: const Icon(Icons.edit_calendar),
+                      onPressed: () async {
+                        final newDate = await _updateDate(
+                          context,
+                          editingApplyDeadline,
+                        );
+                        setState(() {
+                          editingApplyDeadline =
+                              newDate ?? editingApplyDeadline;
+                        });
+                      }),
                   Text(switch (editingApplyDeadline) {
                     DateTime dt => DatabaseItem.formatDate(dt),
                     _ => "No deadline",
@@ -262,7 +293,20 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
                       },
                     ),
                 ],
-              )),
+              )
+            ),
+            (
+              "HIP",
+              Checkbox(
+                checkColor: Colors.white,
+                value: hip,
+                onChanged: (bool? value) {
+                  setState(() {
+                    hip = value!;
+                  });
+                },
+              )
+            ),
           ].map((tup) {
             final label = tup.$1;
             final contents = tup.$2;
