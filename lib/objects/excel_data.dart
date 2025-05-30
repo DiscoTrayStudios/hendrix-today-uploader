@@ -87,6 +87,8 @@ extension AsDatabaseItem on ExcelRow {
       time: time,
       location: location,
       applyDeadline: applyDeadline,
+      // If the only way we mark HIP is in this app, not the spreadsheet, this
+      // null here will be a problem, and overwrite things?
       hip: null,
     );
   }
