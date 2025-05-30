@@ -7,16 +7,15 @@ import 'package:hendrix_today_uploader/firebase/upload_result.dart';
 /// Uploads a [DatabaseItem] to Firestore, or edits the existing one if the ID
 /// of the given item is already present in Firestore.
 Future<UploadResult> uploadToFirestore(DatabaseItem dbItem) async {
-  final data = _generateDocumentSnapshot(dbItem);
+  final data = dbItem.generateDocumentSnapshot();
   final db = FirebaseFirestore.instance;
   try {
     final match = (await db
-        .collection(collectionName)
-        .where("id", isEqualTo: data["id"])
-        .get()
-      )
-      .docs
-      .firstOrNull;
+            .collection(collectionName)
+            .where("id", isEqualTo: data["id"])
+            .get())
+        .docs
+        .firstOrNull;
     if (match == null) {
       await db.collection(collectionName).add(data);
       return UploadResult.successfulInsert(dbItem);
@@ -34,22 +33,6 @@ Future<UploadResult> uploadToFirestore(DatabaseItem dbItem) async {
   }
 }
 
-/// Convert a [DatabaseItem] into a JSON-like format compatible with Firestore.
-Map<String, dynamic> _generateDocumentSnapshot(DatabaseItem dbItem) => {
-  "id": dbItem.id,
-  "title": dbItem.title,
-  "desc": dbItem.desc,
-  "type": dbItem.type.toString(),
-  "contactName": dbItem.contactName,
-  "contactEmail": dbItem.contactEmail,
-  "beginPosting": dbItem.beginPosting,
-  "endPosting": dbItem.endPosting,
-  "date": dbItem.date,
-  "time": dbItem.time,
-  "location": dbItem.location,
-  "applyDeadline": dbItem.applyDeadline,
-};
-
 /// Delete a [DatabaseItem] from Firestore. Does nothing to the database if the
 /// ID is not present in Firestore.
 Future<UploadResult> deleteFromFirestore(DatabaseItem dbItem) async {
@@ -57,8 +40,8 @@ Future<UploadResult> deleteFromFirestore(DatabaseItem dbItem) async {
   final db = FirebaseFirestore.instance;
   try {
     final matches =
-      (await db.collection(collectionName).where("id", isEqualTo: id).get())
-        .docs;
+        (await db.collection(collectionName).where("id", isEqualTo: id).get())
+            .docs;
     if (matches.isEmpty) return UploadResult.idNotPresent(dbItem);
     for (final match in matches) {
       await match.reference.delete();

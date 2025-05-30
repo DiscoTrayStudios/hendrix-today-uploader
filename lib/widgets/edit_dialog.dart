@@ -142,6 +142,18 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
           rows: <(String, Widget)>[
             // all fields written individually, maybe refactor someday?
             (
+              "HIP",
+              Checkbox(
+                checkColor: Colors.white,
+                value: hip,
+                onChanged: (bool? value) {
+                  setState(() {
+                    hip = value!;
+                  });
+                },
+              )
+            ),
+            (
               "Title",
               TextField(
                 controller: titleEditingController,
@@ -293,18 +305,6 @@ class _DatabaseEditDialogState extends State<DatabaseEditDialog> {
                       },
                     ),
                 ],
-              )
-            ),
-            (
-              "HIP",
-              Checkbox(
-                checkColor: Colors.white,
-                value: hip,
-                onChanged: (bool? value) {
-                  setState(() {
-                    hip = value!;
-                  });
-                },
               )
             ),
           ].map((tup) {

@@ -133,11 +133,13 @@ final class DatabaseItem {
       date == other.date &&
       time == other.time &&
       location == other.location &&
-      applyDeadline == other.applyDeadline;
+      applyDeadline == other.applyDeadline &&
+      hip == other.hip;
 
   @override
   String toString() => "DatabaseItem("
       "id=$id, "
+      "hip=$hip, "
       "title='$title',"
       "desc='$desc',"
       "type=$type,"
@@ -149,6 +151,23 @@ final class DatabaseItem {
       "time=${switch (time) { null => "null", String t => "'$t'" }},"
       "location=${switch (location) { null => "null", String l => "'$l'" }},"
       "applyDeadline=${applyDeadline ?? "null"})";
+
+  /// Convert a [DatabaseItem] into a JSON-like format compatible with Firestore.
+  Map<String, dynamic> generateDocumentSnapshot() => {
+        "id": id,
+        "hip": hip,
+        "title": title,
+        "desc": desc,
+        "type": type.toString(),
+        "contactName": contactName,
+        "contactEmail": contactEmail,
+        "beginPosting": beginPosting,
+        "endPosting": endPosting,
+        "date": date,
+        "time": time,
+        "location": location,
+        "applyDeadline": applyDeadline,
+      };
 
   /// A compact standardized date format: YYYY-MMM-D, in which MMM is a three-
   /// letter abbreviation of the month's English name, and D is the numeric day
