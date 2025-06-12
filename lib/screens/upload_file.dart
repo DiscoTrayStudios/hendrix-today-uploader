@@ -29,7 +29,8 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
     for (final row in widget.excel.rows) {
       final result = switch (row.asDatabaseItem()) {
         null => UploadResult.invalidFields(),
-        DatabaseItem translatedItem => await uploadToFirestore(translatedItem),
+        DatabaseItem translatedItem =>
+          await uploadToFirestore(translatedItem, true),
       };
       results.add(result);
       if (result.type == UploadResultType.permissionDenied) break;
@@ -49,8 +50,7 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
         .where((result) => result.type == UploadResultType.invalidFields);
     if (invalidFields.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-            "${invalidFields.length} Excel row"
+        content: Text("${invalidFields.length} Excel row"
             "${invalidFields.length != 1 ? "s are" : " is"} improperly "
             "formatted or missing required data. Please ensure they are "
             "formatted correctly."),
@@ -60,9 +60,8 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
     final unknownErrors =
         results.where((result) => result.type == UploadResultType.unknownError);
     if (unknownErrors.isNotEmpty) {
-      String displayIDs = unknownErrors
-          .map((result) => result.dbItem.id)
-          .join(', ');
+      String displayIDs =
+          unknownErrors.map((result) => result.dbItem.id).join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
             'An unknown error occurred trying to upload the following rows (by '

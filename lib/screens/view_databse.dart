@@ -42,23 +42,14 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
   /// the original to [_itemsToDelete].
   void _afterEditing(DatabaseItem original, DatabaseItem? editedItem) {
     if (editedItem case DatabaseItem newItem) {
-      _itemsToDelete
-        .removeWhere((item) =>
-          item.id == newItem.id
-        );
-      _itemsToEdit
-        .removeWhere((item) =>
-          item.id == newItem.id
-        );
+      _itemsToDelete.removeWhere((item) => item.id == newItem.id);
+      _itemsToEdit.removeWhere((item) => item.id == newItem.id);
       if (!newItem.equals(original)) {
         _itemsToEdit.add(newItem);
       }
     } else {
       if (_markedForDeletion(original)) {
-        _itemsToDelete
-          .removeWhere((item) =>
-            item.id == original.id
-          );
+        _itemsToDelete.removeWhere((item) => item.id == original.id);
       } else {
         _itemsToDelete.add(original);
       }
@@ -68,14 +59,12 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
   }
 
   /// Has an item been marked for editing which has the same ID as [dbItem]?
-  bool _markedForEdit(DatabaseItem dbItem) => _itemsToEdit
-    .map((item) => item.id)
-    .contains(dbItem.id);
-  
+  bool _markedForEdit(DatabaseItem dbItem) =>
+      _itemsToEdit.map((item) => item.id).contains(dbItem.id);
+
   /// Has an item been marked for deletion which has the same ID as [dbItem]?
-  bool _markedForDeletion(DatabaseItem dbItem) => _itemsToDelete
-    .map((item) => item.id)
-    .contains(dbItem.id);
+  bool _markedForDeletion(DatabaseItem dbItem) =>
+      _itemsToDelete.map((item) => item.id).contains(dbItem.id);
 
   void _markOldEventsToDelete() {
     final today = DateTime.now();
@@ -90,12 +79,12 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
 
   TextStyle get _normalStyle => TextStyle();
   TextStyle get _editStyle => TextStyle(
-    fontWeight: FontWeight.bold,
-  );
+        fontWeight: FontWeight.bold,
+      );
   TextStyle get _deleteStyle => TextStyle(
-    color: Theme.of(context).colorScheme.error,
-    fontWeight: FontWeight.bold,
-  );
+        color: Theme.of(context).colorScheme.error,
+        fontWeight: FontWeight.bold,
+      );
 
   TextStyle _tableStyleFor(DatabaseItem dbItem) {
     if (_markedForDeletion(dbItem)) {
@@ -111,9 +100,8 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
   /// that has been edited this session. If so, the newer version is returned;
   /// otherwise, the original item is returned.
   DatabaseItem _latestVersion(DatabaseItem dbItem) {
-    final editedVersion = _itemsToEdit
-      .where((item) => item.id == dbItem.id)
-      .firstOrNull;
+    final editedVersion =
+        _itemsToEdit.where((item) => item.id == dbItem.id).firstOrNull;
     return switch (editedVersion) {
       null => dbItem,
       DatabaseItem latestVersion => latestVersion,
@@ -147,7 +135,7 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
       }
     }
     for (final itemToEdit in _itemsToEdit) {
-      changeResults.add(await uploadToFirestore(itemToEdit));
+      changeResults.add(await uploadToFirestore(itemToEdit, false));
       if (changeResults.last.type == UploadResultType.permissionDenied) {
         break;
       }
@@ -190,9 +178,8 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
     final idsNotPresent =
         results.where((result) => result.type == UploadResultType.idNotPresent);
     if (idsNotPresent.isNotEmpty) {
-      String displayIDs = idsNotPresent
-          .map((result) => result.dbItem.id)
-          .join(', ');
+      String displayIDs =
+          idsNotPresent.map((result) => result.dbItem.id).join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
             "The following items (by ID) could not be updated because their "
@@ -203,9 +190,8 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
     final unknownErrors =
         results.where((result) => result.type == UploadResultType.unknownError);
     if (unknownErrors.isNotEmpty) {
-      String displayIDs = unknownErrors
-          .map((result) => result.dbItem.id)
-          .join(', ');
+      String displayIDs =
+          unknownErrors.map((result) => result.dbItem.id).join(', ');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
             "An unknown error occurred trying to update the following items "
@@ -221,9 +207,8 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
             'item${successfulDeletes.length != 1 ? 's' : ''}!'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ));
-      final deletedIDs = successfulDeletes
-        .map((delete) => delete.dbItem.id)
-        .toList();
+      final deletedIDs =
+          successfulDeletes.map((delete) => delete.dbItem.id).toList();
       _itemsToDelete.removeWhere((item) => deletedIDs.contains(item.id));
     }
     final successfulUpdates = results
@@ -234,9 +219,8 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
             'item${successfulUpdates.length != 1 ? 's' : ''}!'),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ));
-      final updatedIDs = successfulUpdates
-        .map((update) => update.dbItem.id)
-        .toList();
+      final updatedIDs =
+          successfulUpdates.map((update) => update.dbItem.id).toList();
       _itemsToEdit.removeWhere((item) => updatedIDs.contains(item.id));
     }
   }
@@ -300,13 +284,16 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                             ? const Text("Upload in progress...")
                             : const Text("Apply changes"),
                       ),
-                    ].map((e) => e is Spacer
-                      ? e
-                      : Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: e
-                      ),
-                    ).toList(),
+                    ]
+                        .map(
+                          (e) => e is Spacer
+                              ? e
+                              : Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  child: e),
+                        )
+                        .toList(),
                   ),
                 ),
               if (_retrievedItems == null)
@@ -315,51 +302,51 @@ class _DatabaseViewScreenState extends State<DatabaseViewScreen> {
                 TableScroller(
                   child: DataTable(
                     columns: DatabaseItem.fieldTitles
-                      .map((title) => DataColumn(
-                        label: Text(title),
-                      ))
-                      .toList(),
-                    rows: _retrievedItems!
-                      .map((originalRowItem) {
-                        final rowItem = _latestVersion(originalRowItem);
-                        return DataRow(
-                          cells: rowItem
-                            .fieldContents
-                            .map((dynamic cellData) => DataCell(
-                              Container(
-                                constraints: const BoxConstraints(
-                                  maxWidth: 300,
-                                  maxHeight: 40,
-                                ),
-                                child: Text(
-                                  switch (cellData) {
-                                    null => "",
-                                    DateTime dt => DatabaseItem.formatDate(dt),
-                                    dynamic otherType => otherType.toString(),
-                                  },
-                                  style: _tableStyleFor(rowItem),
-                                  overflow: TextOverflow.fade,
-                                ),
-                              ),
-                              onTap: () async {
-                                await showDialog<DatabaseItem?>(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) => DatabaseEditDialog(
-                                    dbItem: rowItem,
-                                    isDeleted: _markedForDeletion(rowItem),
-                                  ),
-                                ).then((editedItem) {
-                                  setState(() {
-                                    _afterEditing(originalRowItem, editedItem);
-                                  });
-                                });
-                              },
+                        .map((title) => DataColumn(
+                              label: Text(title),
                             ))
+                        .toList(),
+                    rows: _retrievedItems!.map((originalRowItem) {
+                      final rowItem = _latestVersion(originalRowItem);
+                      return DataRow(
+                        cells: rowItem.fieldContents
+                            .map((dynamic cellData) => DataCell(
+                                  Container(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 300,
+                                      maxHeight: 40,
+                                    ),
+                                    child: Text(
+                                      switch (cellData) {
+                                        null => "",
+                                        DateTime dt =>
+                                          DatabaseItem.formatDate(dt),
+                                        dynamic otherType =>
+                                          otherType.toString(),
+                                      },
+                                      style: _tableStyleFor(rowItem),
+                                      overflow: TextOverflow.fade,
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    await showDialog<DatabaseItem?>(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) => DatabaseEditDialog(
+                                        dbItem: rowItem,
+                                        isDeleted: _markedForDeletion(rowItem),
+                                      ),
+                                    ).then((editedItem) {
+                                      setState(() {
+                                        _afterEditing(
+                                            originalRowItem, editedItem);
+                                      });
+                                    });
+                                  },
+                                ))
                             .toList(),
-                        );
-                      })
-                      .toList(),
+                      );
+                    }).toList(),
                   ),
                 ),
             ],

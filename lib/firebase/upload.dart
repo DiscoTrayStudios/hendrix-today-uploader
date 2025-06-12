@@ -6,7 +6,8 @@ import 'package:hendrix_today_uploader/firebase/upload_result.dart';
 
 /// Uploads a [DatabaseItem] to Firestore, or edits the existing one if the ID
 /// of the given item is already present in Firestore.
-Future<UploadResult> uploadToFirestore(DatabaseItem dbItem) async {
+Future<UploadResult> uploadToFirestore(
+    DatabaseItem dbItem, bool fromSpreadsheet) async {
   final data = dbItem.generateDocumentSnapshot();
   final db = FirebaseFirestore.instance;
   try {
@@ -20,6 +21,10 @@ Future<UploadResult> uploadToFirestore(DatabaseItem dbItem) async {
       await db.collection(collectionName).add(data);
       return UploadResult.successfulInsert(dbItem);
     } else {
+      if (fromSpreadsheet) {
+        bool dbhip = await match.get("hip");
+        data["hip"] = dbhip;
+      }
       await match.reference.set(data);
       return UploadResult.successfulUpdate(dbItem);
     }
