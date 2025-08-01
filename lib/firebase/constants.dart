@@ -3,6 +3,7 @@ const collectionName = 'events';
 
 typedef ExcelField = ({int column, String name});
 
+// Need to add HIP here TODO
 const ExcelField idField = (column: 0, name: 'ID');
 const ExcelField titleField = (column: 8, name: 'Title');
 const ExcelField descField = (column: 15, name: 'Description');
@@ -22,6 +23,7 @@ const ExcelField applyDeadlineField =
 /// The `column` of each field corresponds to the 0-indexed column of the
 /// submission form's Excel output at which the associated field data exists.
 final orderedFields = List<ExcelField>.unmodifiable(const [
+  // ALSO NEED HIP HERE TODO
   idField,
   titleField,
   descField,
