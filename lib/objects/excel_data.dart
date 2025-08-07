@@ -74,6 +74,10 @@ extension AsDatabaseItem on ExcelRow {
     final DateTime? applyDeadline = parseDateTime(
       get(applyDeadlineField.column),
     );
+    final String? hipS = get(hipField.column);
+    String hipSt = hipS ?? "No";
+    final hip = hipSt.toUpperCase() == "TRUE" || hipSt.toUpperCase() == "YES";
+
     return DatabaseItem(
       id: id,
       title: title,
@@ -87,9 +91,7 @@ extension AsDatabaseItem on ExcelRow {
       time: time,
       location: location,
       applyDeadline: applyDeadline,
-      // If the only way we mark HIP is in this app, not the spreadsheet, this
-      // null here will be a problem, and overwrite things?
-      hip: null,
+      hip: hip,
     );
   }
 }
