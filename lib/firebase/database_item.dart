@@ -3,7 +3,8 @@
 enum DatabaseItemType {
   event,
   announcement,
-  meeting;
+  meeting,
+  athletics;
 
   @override
   String toString() {
@@ -14,6 +15,8 @@ enum DatabaseItemType {
         return "Announcement";
       case meeting:
         return "Meeting";
+      case athletics:
+        return "Athletics";
     }
   }
 
@@ -26,6 +29,8 @@ enum DatabaseItemType {
         return announcement;
       case "meeting":
         return meeting;
+      case "athletics":
+        return athletics;
       default:
         return null;
     }
